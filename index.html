@@ -155,9 +155,10 @@
   .item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(13,31,60,0.15); border-color: var(--gold); }
   .item-card.closed { opacity: .7; }
 
-  .item-img { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--border-light); }
+  .item-img { width: 100%; height: 160px; object-fit: cover; display: block; background: var(--border-light); cursor:zoom-in; transition: opacity .15s; }
+  .item-img:hover { opacity:.85; }
   .item-img-placeholder {
-    width: 100%; height: 200px;
+    width: 100%; height: 160px;
     background: linear-gradient(135deg, #e8dfc8, #d4c8a8);
     display: flex; align-items: center; justify-content: center;
     font-size: 48px; color: var(--gold-dim);
@@ -207,7 +208,7 @@
   .modal-close:hover { color: var(--navy); }
   .modal h2 { font-family: 'Cinzel', serif; color: var(--navy); font-size: 20px; margin-bottom: 6px; padding-right: 30px; line-height: 1.3; }
   .modal-meta { font-size: 13px; color: var(--text-dim); margin-bottom: 16px; }
-  .modal-img { width: 100%; height: 260px; object-fit: cover; border-radius: 4px; margin-bottom: 16px; border: 1px solid var(--border-light); }
+  .modal-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 4px; margin-bottom: 16px; border: 1px solid var(--border-light); background: var(--page-bg); cursor:zoom-in; }
   .modal-desc { font-size: 15px; color: var(--text-mid); line-height: 1.6; margin-bottom: 20px; }
 
   .current-bid-box {
@@ -331,6 +332,49 @@
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
   .empty-state .icon { font-size: 48px; margin-bottom: 12px; display: block; }
   .empty-state p { font-family: 'Lora', serif; font-style: italic; }
+
+
+  /* ── LIGHTBOX ── */
+  #lightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92); z-index: 2000;
+    align-items: center; justify-content: center;
+    cursor: zoom-out;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img {
+    max-width: 94vw; max-height: 90vh;
+    object-fit: contain; border-radius: 4px;
+    box-shadow: 0 8px 60px rgba(0,0,0,0.8);
+  }
+  #lightbox-close {
+    position: absolute; top: 16px; right: 20px;
+    color: white; font-size: 32px; cursor: pointer;
+    background: none; border: none; line-height: 1;
+    opacity: .7; transition: opacity .15s;
+  }
+  #lightbox-close:hover { opacity: 1; }
+  #lightbox-caption {
+    position: absolute; bottom: 16px; left: 0; right: 0;
+    text-align: center; color: rgba(255,255,255,.6);
+    font-family: 'Lora', serif; font-style: italic; font-size: 14px;
+  }
+
+  /* ── CONTACT METHOD TOGGLE ── */
+  .contact-method-row {
+    display: flex; gap: 0; margin-bottom: 14px;
+    border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  }
+  .contact-method-btn {
+    flex: 1; padding: 10px 8px;
+    background: none; border: none; border-right: 1px solid var(--border);
+    font-family: 'Source Sans 3', sans-serif; font-size: 14px;
+    color: var(--text-dim); cursor: pointer; transition: all .15s;
+    text-align: center;
+  }
+  .contact-method-btn:last-child { border-right: none; }
+  .contact-method-btn.active { background: var(--navy); color: var(--gold); font-weight: 600; }
+  .contact-method-btn:hover:not(.active) { background: var(--page-bg); }
 
   @media (max-width: 600px) {
     .items-grid { grid-template-columns: 1fr; }
@@ -512,7 +556,7 @@
     <p class="item-cat" id="modal-cat" style="color:var(--gold-dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px"></p>
     <h2 id="modal-title"></h2>
     <p class="modal-meta" id="modal-meta"></p>
-    <img id="modal-img" class="modal-img" src="" alt="" style="display:none">
+    <img id="modal-img" class="modal-img" src="" alt="" style="display:none" onclick="openLightbox(this.src, document.getElementById('modal-title').textContent)">
     <p class="modal-desc" id="modal-desc"></p>
 
     <div class="current-bid-box">
@@ -550,7 +594,15 @@
           <input type="tel" id="bid-phone" placeholder="(813) 555-0100" autocomplete="tel">
         </div>
         <div style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:14px">
-          <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:10px;letter-spacing:.5px">&#x1F4EC; Email Notifications</p>
+          <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:10px;letter-spacing:.5px">&#x1F514; Bid Notifications</p>
+          <p style="font-size:12px;color:var(--text-dim);margin-bottom:10px">How would you like to be contacted?</p>
+          <div class="contact-method-row">
+            <button type="button" class="contact-method-btn active" id="cm-email" onclick="setContactMethod('email')">&#x1F4E7; Email</button>
+            <button type="button" class="contact-method-btn" id="cm-text" onclick="setContactMethod('text')">&#x1F4F1; Text</button>
+            <button type="button" class="contact-method-btn" id="cm-both" onclick="setContactMethod('both')">Both</button>
+            <button type="button" class="contact-method-btn" id="cm-none" onclick="setContactMethod('none')">None</button>
+          </div>
+          <input type="hidden" id="bid-contact-method" value="email">
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px;font-size:14px;color:var(--text-mid)">
             <input type="checkbox" id="bid-notify-outbid" checked style="width:18px;height:18px;accent-color:var(--navy)">
             Notify me if I am outbid
@@ -576,13 +628,19 @@
         <div id="bid-returning-greeting" style="display:none;background:var(--page-bg);border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:4px;padding:12px 16px;margin-bottom:16px">
           <p style="font-size:14px;color:var(--text-mid)">Welcome back, <strong id="bid-greeting-name" style="color:var(--navy)"></strong>!
           <button onclick="clearBidderCookie()" style="background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;text-decoration:underline;margin-left:8px">Not you?</button></p>
-          <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
+          <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;align-items:center">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-mid)">
               <input type="checkbox" id="bid-notify-outbid-ret" checked style="width:16px;height:16px;accent-color:var(--navy)"> Outbid alerts
             </label>
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-mid)">
-              <input type="checkbox" id="bid-notify-win-ret" checked style="width:16px;height:16px;accent-color:var(--navy)"> Win notification
+              <input type="checkbox" id="bid-notify-win-ret" checked style="width:16px;height:16px;accent-color:var(--navy)"> Win alerts
             </label>
+            <select id="bid-contact-method-ret" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:white;color:var(--text);outline:none">
+              <option value="email">&#x1F4E7; Email</option>
+              <option value="text">&#x1F4F1; Text</option>
+              <option value="both">Both</option>
+              <option value="none">No alerts</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
@@ -604,6 +662,13 @@
       <div id="modal-bid-history"></div>
     </div>
   </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption"></div>
 </div>
 
 <div id="toast"></div>
@@ -726,7 +791,8 @@ function initCountdown() {
 /* ═══════════════════════════ ITEMS ═══════════════════════════ */
 async function loadItems() {
   try {
-    allItems = await sb('auction_items?order=status.asc,created_at.asc&select=*');
+    const raw = await sb('auction_items?order=status.asc,created_at.asc&select=*,auction_bids(count)');
+    allItems = (raw||[]).map(item => ({ ...item, bid_count: item.auction_bids?.[0]?.count ?? 0 }));
     renderItems();
   } catch(e) {
     document.getElementById('items-loading').textContent = 'Error loading items: ' + e.message;
@@ -747,7 +813,7 @@ function itemCardHTML(item) {
   const count = item.bid_count || 0;
   const icon = categoryIcon(item.category);
   const imgHTML = item.image_url
-    ? `<img class="item-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    ? `<img class="item-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onclick="event.stopPropagation();openLightbox('${esc(item.image_url)}','${esc(item.title)}')" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
   const placeholderStyle = item.image_url ? 'display:none' : '';
   const statusLabel = item.status === 'open' ? 'Open' : item.status === 'upcoming' ? 'Soon' : 'Closed';
@@ -880,6 +946,15 @@ async function loadBidHistory(itemId) {
   c.innerHTML = '<div style="color:var(--text-dim);font-size:13px">Loading…</div>';
   try {
     const bids = await sb(`auction_bids?item_id=eq.${itemId}&order=amount.desc&limit=20`);
+    // Update live count on modal
+    const count = bids ? bids.length : 0;
+    document.getElementById('modal-bid-count').textContent = `${count} bid${count!==1?'s':''} placed`;
+    // Also patch currentItemData so card re-render is accurate
+    if (currentItemData && currentItemData.id === itemId) {
+      currentItemData.bid_count = count;
+      const idx = allItems.findIndex(i => i.id === itemId);
+      if (idx >= 0) allItems[idx].bid_count = count;
+    }
     if (!bids || bids.length===0) { c.innerHTML='<div style="color:var(--text-dim);font-size:13px;font-style:italic">No bids yet — be the first!</div>'; return; }
     c.innerHTML = bids.map((b,i) => `
       <div class="bid-row${i===0?' winning':''}">
@@ -935,11 +1010,12 @@ async function submitBid() {
     });
     const shortName = currentBidder.name.split(' ')[0]+' '+(currentBidder.name.split(' ')[1]?.[0]||'')+'.';
     await sb(`auction_items?id=eq.${currentItemId}`, { method:'PATCH', headers:{'Prefer':'return=minimal'}, body:{ current_bid:amount, current_bidder:shortName } });
-    const updated = await sb(`auction_items?id=eq.${currentItemId}&select=*`);
-    if (updated&&updated[0]) {
-      currentItemData=updated[0];
+    const updatedRaw = await sb(`auction_items?id=eq.${currentItemId}&select=*,auction_bids(count)`);
+    if (updatedRaw&&updatedRaw[0]) {
+      const updated0 = { ...updatedRaw[0], bid_count: updatedRaw[0].auction_bids?.[0]?.count ?? 0 };
+      currentItemData=updated0;
       const idx=allItems.findIndex(i=>i.id===currentItemId);
-      if(idx>=0) allItems[idx]=updated[0];
+      if(idx>=0) allItems[idx]=updated0;
       updateModalBidInfo(updated[0]);
     }
     await loadBidHistory(currentItemId);
@@ -1047,7 +1123,8 @@ async function loadAdminItems() {
   const table=document.getElementById('admin-items-table');
   loading.style.display='block'; table.style.display='none';
   try {
-    const items=await sb('auction_items?order=created_at.desc&select=*');
+    const rawItems=await sb('auction_items?order=created_at.desc&select=*,auction_bids(count)');
+    const items=(rawItems||[]).map(item => ({ ...item, bid_count: item.auction_bids?.[0]?.count ?? 0 }));
     allItems=items||[];
     const body=document.getElementById('admin-items-body');
     body.innerHTML=(items||[]).map(item=>{
