@@ -155,10 +155,10 @@
   .item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(13,31,60,0.15); border-color: var(--gold); }
   .item-card.closed { opacity: .7; }
 
-  .item-img { width: 100%; height: 160px; object-fit: cover; display: block; background: var(--border-light); cursor:zoom-in; transition: opacity .15s; }
+  .item-img { width: 100%; height: 180px; object-fit: contain; display: block; background: #f0ebe0; cursor:zoom-in; transition: opacity .15s; padding: 4px; }
   .item-img:hover { opacity:.85; }
   .item-img-placeholder {
-    width: 100%; height: 160px;
+    width: 100%; height: 180px;
     background: linear-gradient(135deg, #e8dfc8, #d4c8a8);
     display: flex; align-items: center; justify-content: center;
     font-size: 48px; color: var(--gold-dim);
@@ -545,6 +545,63 @@
           </table>
         </div>
       </div>
+
+      <!-- ADMIN NOTIFICATION RECIPIENTS -->
+      <div class="admin-section">
+        <h3>&#x1F514; Admin Bid Notifications</h3>
+        <p style="font-size:14px;color:var(--text-dim);margin-bottom:18px;line-height:1.6">
+          People listed here will be notified whenever a new bid is placed. Specify email and/or phone for each.
+        </p>
+        <div id="admin-notif-list" style="margin-bottom:16px"></div>
+        <div style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:16px">
+          <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;letter-spacing:.5px">&#x2795; Add Administrator</p>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0">
+              <label>Name</label>
+              <input type="text" id="an-name" placeholder="e.g. Robin Conn">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Role / Title</label>
+              <input type="text" id="an-role" placeholder="e.g. Tournament OIC">
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:12px">
+            <div class="form-group" style="margin-bottom:0">
+              <label>Email (for email alerts)</label>
+              <input type="email" id="an-email" placeholder="admin@tamparoughriders.org">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Phone (for text alerts)</label>
+              <input type="tel" id="an-phone" placeholder="(813) 555-0100">
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-mid);cursor:pointer">
+              <input type="checkbox" id="an-via-email" checked style="width:16px;height:16px;accent-color:var(--navy)"> Email alerts
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-mid);cursor:pointer">
+              <input type="checkbox" id="an-via-text" style="width:16px;height:16px;accent-color:var(--navy)"> Text alerts
+            </label>
+            <span style="width:1px;height:20px;background:var(--border);display:inline-block"></span>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-mid);cursor:pointer">
+              <input type="checkbox" id="an-all-bids" checked style="width:16px;height:16px;accent-color:var(--navy)"> Every bid
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-mid);cursor:pointer">
+              <input type="checkbox" id="an-new-high" checked style="width:16px;height:16px;accent-color:var(--navy)"> New high bids only
+            </label>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+            <button class="btn btn-gold btn-sm" onclick="addAdminRecipient()">Add to List</button>
+            <p id="an-error" style="color:var(--red);font-size:13px;display:none;margin:0"></p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-navy" onclick="saveAdminRecipients()">&#x1F4BE; Save Recipients</button>
+          <button class="btn btn-outline" onclick="loadAdminRecipients()">&#x21BA; Reload</button>
+        </div>
+        <p id="an-save-msg" style="font-size:13px;margin-top:10px;color:var(--green);display:none">&#x2714; Saved successfully.</p>
+      </div>
+
     </div>
   </div>
 </main>
@@ -1132,7 +1189,7 @@ function adminLogin() {
   } else { document.getElementById('admin-login-err').style.display='block'; }
 }
 
-async function loadAdminData() { await loadAdminItems(); await loadAdminBids(); }
+async function loadAdminData() { await loadAdminItems(); await loadAdminBids(); await loadAdminRecipients(); }
 
 async function loadAdminItems() {
   const loading=document.getElementById('admin-items-loading');
@@ -1291,6 +1348,102 @@ function setContactMethod(method) {
   });
   const hid = document.getElementById('bid-contact-method');
   if (hid) hid.value = method;
+}
+
+/* ═══════════════════════════ HELPERS ═══════════════════════════ */
+/* ═══════════════════════════ ADMIN NOTIFICATION RECIPIENTS ═══════════════════════════ */
+let adminRecipients = []; // [{name, role, email, phone, viaEmail, viaText, allBids, newHigh}]
+const SETTINGS_KEY = 'admin_notif_recipients';
+
+async function loadAdminRecipients() {
+  const container = document.getElementById('admin-notif-list');
+  try {
+    const rows = await sb(`auction_settings?key=eq.${SETTINGS_KEY}&select=value`);
+    if (rows && rows[0]) {
+      adminRecipients = JSON.parse(rows[0].value) || [];
+    } else {
+      adminRecipients = [];
+    }
+  } catch(e) {
+    adminRecipients = [];
+  }
+  renderAdminRecipients();
+}
+
+function renderAdminRecipients() {
+  const container = document.getElementById('admin-notif-list');
+  if (!adminRecipients.length) {
+    container.innerHTML = '<p style="color:var(--text-dim);font-size:14px;font-style:italic">No administrators added yet.</p>';
+    return;
+  }
+  container.innerHTML = adminRecipients.map((r, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 14px;background:var(--page-bg);border:1px solid var(--border);border-radius:6px;margin-bottom:8px">
+      <div>
+        <strong style="color:var(--navy);font-size:15px">${esc(r.name)}</strong>
+        ${r.role ? `<span style="color:var(--text-dim);font-size:13px;margin-left:8px">${esc(r.role)}</span>` : ''}
+        <div style="margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">
+          ${r.email ? `<span style="font-size:13px;color:var(--text-mid)">&#x1F4E7; ${esc(r.email)}</span>` : ''}
+          ${r.phone ? `<span style="font-size:13px;color:var(--text-mid)">&#x1F4F1; ${esc(r.phone)}</span>` : ''}
+        </div>
+        <div style="margin-top:5px;display:flex;gap:8px;flex-wrap:wrap">
+          ${r.viaEmail ? '<span style="font-size:11px;background:#d4edda;color:#155724;padding:2px 8px;border-radius:10px">Email</span>' : ''}
+          ${r.viaText ? '<span style="font-size:11px;background:#cce5ff;color:#004085;padding:2px 8px;border-radius:10px">Text</span>' : ''}
+          ${r.allBids ? '<span style="font-size:11px;background:#fff3cd;color:#856404;padding:2px 8px;border-radius:10px">Every bid</span>' : ''}
+          ${r.newHigh ? '<span style="font-size:11px;background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:10px">New highs</span>' : ''}
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeAdminRecipient(${i})">Remove</button>
+    </div>`).join('');
+}
+
+function addAdminRecipient() {
+  const name = document.getElementById('an-name').value.trim();
+  const role = document.getElementById('an-role').value.trim();
+  const email = document.getElementById('an-email').value.trim();
+  const phone = document.getElementById('an-phone').value.trim();
+  const viaEmail = document.getElementById('an-via-email').checked;
+  const viaText = document.getElementById('an-via-text').checked;
+  const allBids = document.getElementById('an-all-bids').checked;
+  const newHigh = document.getElementById('an-new-high').checked;
+  const errEl = document.getElementById('an-error');
+
+  if (!name) { errEl.textContent='Name is required.'; errEl.style.display='block'; return; }
+  if (!email && !phone) { errEl.textContent='Enter at least an email or phone number.'; errEl.style.display='block'; return; }
+  if (!viaEmail && !viaText) { errEl.textContent='Select at least one notification method.'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+
+  adminRecipients.push({ name, role, email, phone, viaEmail, viaText, allBids, newHigh });
+  renderAdminRecipients();
+
+  // Clear form
+  ['an-name','an-role','an-email','an-phone'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('an-via-email').checked=true;
+  document.getElementById('an-via-text').checked=false;
+  document.getElementById('an-all-bids').checked=true;
+  document.getElementById('an-new-high').checked=true;
+}
+
+function removeAdminRecipient(idx) {
+  adminRecipients.splice(idx, 1);
+  renderAdminRecipients();
+}
+
+async function saveAdminRecipients() {
+  const msgEl = document.getElementById('an-save-msg');
+  msgEl.style.display='none';
+  try {
+    // Upsert into auction_settings
+    await sb('auction_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: { key: SETTINGS_KEY, value: JSON.stringify(adminRecipients) }
+    });
+    msgEl.style.display='block';
+    setTimeout(()=>msgEl.style.display='none', 3000);
+    showToast('Admin recipients saved.');
+  } catch(e) {
+    showToast('Error saving: '+e.message);
+  }
 }
 
 /* ═══════════════════════════ HELPERS ═══════════════════════════ */
