@@ -761,6 +761,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Lightbox click-outside to close
+  document.getElementById('lightbox').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeLightbox();
+  });
+  // Escape key closes lightbox or modal
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('lightbox').classList.contains('open')) closeLightbox();
+      else if (document.getElementById('bid-modal').classList.contains('open')) closeModal();
+    }
+  });
+
   // Drag & drop
   const area = document.getElementById('upload-area');
   area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
@@ -905,6 +917,8 @@ function showBidStepAmount(returning) {
     document.getElementById('bid-greeting-name').textContent = currentBidder.name.split(' ')[0];
     document.getElementById('bid-notify-outbid-ret').checked = !!currentBidder.notifyOutbid;
     document.getElementById('bid-notify-win-ret').checked = !!currentBidder.notifyWin;
+    const cmRet = document.getElementById('bid-contact-method-ret');
+    if (cmRet) cmRet.value = currentBidder.contactMethod || 'email';
   } else {
     greet.style.display = 'none';
   }
@@ -924,9 +938,10 @@ function proceedToBidAmount() {
 
   const notifyOutbid = document.getElementById('bid-notify-outbid').checked;
   const notifyWin = document.getElementById('bid-notify-win').checked;
+  const contactMethod = document.getElementById('bid-contact-method').value || 'email';
   const remember = document.getElementById('bid-remember').checked;
 
-  currentBidder = { name, email, phone, notifyOutbid, notifyWin };
+  currentBidder = { name, email, phone, notifyOutbid, notifyWin, contactMethod };
   if (remember) setBidderCookie(currentBidder);
 
   showBidStepAmount(false);
@@ -981,7 +996,7 @@ async function submitBid() {
   if (isReturning) {
     currentBidder.notifyOutbid = document.getElementById('bid-notify-outbid-ret').checked;
     currentBidder.notifyWin = document.getElementById('bid-notify-win-ret').checked;
-    // Update cookie with latest prefs
+    currentBidder.contactMethod = document.getElementById('bid-contact-method-ret').value || 'email';
     if (getBidderCookie()) setBidderCookie(currentBidder);
   }
 
@@ -1004,7 +1019,8 @@ async function submitBid() {
         bidder_phone: currentBidder.phone,
         amount,
         notify_outbid: currentBidder.notifyOutbid,
-        notify_win: currentBidder.notifyWin
+        notify_win: currentBidder.notifyWin,
+        contact_method: currentBidder.contactMethod || 'email'
       },
       prefer:'return=minimal'
     });
@@ -1250,6 +1266,31 @@ function clearItemForm() {
 function setDefaultEndDate() {
   const d=new Date(GLOBAL_AUCTION_END);
   document.getElementById('f-ends-at').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+}
+
+/* ═══════════════════════════ LIGHTBOX ═══════════════════════════ */
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption || '';
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  // only restore scroll if bid modal also closed
+  if (!document.getElementById('bid-modal').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+
+/* ═══════════════════════════ CONTACT METHOD ═══════════════════════════ */
+function setContactMethod(method) {
+  ['email','text','both','none'].forEach(m => {
+    const btn = document.getElementById('cm-' + m);
+    if (btn) btn.classList.toggle('active', m === method);
+  });
+  const hid = document.getElementById('bid-contact-method');
+  if (hid) hid.value = method;
 }
 
 /* ═══════════════════════════ HELPERS ═══════════════════════════ */
