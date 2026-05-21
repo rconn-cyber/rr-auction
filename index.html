@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Rough Riders Fishing Tournament</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d1f3c; --navy-mid: #152d54; --navy-light: #1e3f70;
+  --gold: #c9a84c; --gold-light: #e8c870; --gold-dark: #a07830;
+  --water: #0a4a6e; --water-light: #0e6a9e;
+  --cream: #f5f0e8; --white: #ffffff;
+  --text-dark: #1a1a2e; --text-mid: #445577;
+  --green: #1a6b3c; --red: #8B2020; --amber: #b87d00;
+  --shadow: 0 4px 24px rgba(13,31,60,0.15);
+  --border: #d4dae8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Crimson Pro', Georgia, serif; background: #f0f2f8; color: var(--text-dark); min-height: 100vh; }
+
+/* LOGIN */
+.login-screen {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #05111f 0%, #0a2d52 50%, #0e4a6e 100%);
+}
+.login-box {
+  background: white;
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 360px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  text-align: center;
+}
+.login-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.login-sub { font-size: 14px; color: var(--text-mid); font-style: italic; margin-bottom: 32px; }
+.login-input {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Crimson Pro', serif; font-size: 18px;
+  color: var(--text-dark); background: #fafbfe;
+  outline: none; margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.login-input:focus { border-color: var(--navy-light); }
+.login-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  color: white; border: none; border-radius: 10px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 16px;
+  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: opacity 0.2s;
+}
+.login-btn:hover { opacity: 0.9; }
+.login-error { color: #c53030; font-size: 14px; margin-top: 10px; }
+
+/* LAYOUT */
+.app { display: none; min-height: 100vh; }
+.app.visible { display: block; }
+
+.topbar {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 0 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+  border-bottom: 2px solid rgba(201,168,76,0.3);
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--gold-light);
+  display: flex; align-items: center; gap: 10px;
+}
+.topbar-title svg { width: 18px; height: 18px; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-btn {
+  padding: 7px 16px;
+  border-radius: 7px; border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75);
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; text-decoration: none; transition: all 0.2s;
+}
+.topbar-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+.tabs-nav {
+  background: white;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  padding: 0 28px;
+}
+.nav-tab {
+  padding: 14px 20px;
+  background: none; border: none;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 14px;
+  font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-mid); cursor: pointer;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  transition: all 0.2s;
+}
+.nav-tab:hover { color: var(--navy); }
+.nav-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+
+.content { padding: 28px; max-width: 1200px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* STATS ROW */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: white; border-radius: 12px; padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+.stat-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+  font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-mid); margin-bottom: 6px;
+}
+.stat-value {
+  font-family: 'Cinzel', serif; font-size: 28px;
+  font-weight: 700; color: var(--navy);
+}
+.stat-sub { font-size: 13px; color: var(--text-mid); margin-top: 2px; }
+
+/* TOOLBAR */
+.toolbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.search-box {
+  flex: 1; min-width: 220px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: 'Crimson Pro', serif; font-size: 16px;
+  color: var(--text-dark); outline: none;
+  background: white;
+}
+.search-box:focus { border-color: var(--navy-light); }
+.action-btn {
+  padding: 10px 18px;
+  border-radius: 8px; border: none; cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  transition: all 0.2s;
+}
+.btn-primary { background: var(--navy); color: white; }
+.btn-primary:hover { background: var(--navy-light); }
+.btn-secondary { background: white; color: var(--navy); border: 1.5px solid var(--border); }
+.btn-secondary:hover { border-color: var(--navy); }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { opacity: 0.85; }
+.btn-gold { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: var(--navy); }
+.btn-export { background: var(--green); color: white; }
+
+/* TABLE */
+.table-wrap { background: white; border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead tr { background: var(--navy); color: white; }
+.data-table thead th {
+  padding: 14px 16px; text-align: left;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px;
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.data-table tbody tr { border-bottom: 1px solid #f0f2f8; transition: background 0.15s; }
+.data-table tbody tr:hover { background: #f8f9fd; }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table td { padding: 12px 16px; font-size: 15px; vertical-align: middle; }
+.data-table td.actions { white-space: nowrap; }
+
+/* BADGES */
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+  font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.badge-paid    { background: #e6f4ec; color: var(--green); }
+.badge-invoice { background: #fff4e0; color: var(--amber); }
+.badge-pending { background: #f0f2f8; color: var(--text-mid); }
+.badge-title, .badge-platinum { background: #fce8e8; color: var(--red); }
+.badge-gold, .badge-commodore { background: #fff8e0; color: #8B6914; }
+.badge-silver, .badge-captain { background: #f2f4f8; color: #555; }
+.badge-awards  { background: #fff4e0; color: #8B5e14; }
+.badge-friday  { background: #e8f0ff; color: var(--navy-light); }
+.badge-scoring { background: #e8f4ec; color: #2d7a4a; }
+.badge-snook   { background: #e0f4ff; color: var(--water); }
+.badge-bronze, .badge-mate { background: #fdf0e0; color: #8B5e14; }
+.badge-redfish { background: #fce8e8; color: #c53030; }
+.badge-bizcard { background: #f2f4f8; color: #555; }
+.badge-anchor, .badge-crew { background: #e8f4fd; color: var(--water); }
+.badge-custom  { background: #f8f0ff; color: #6b3a8a; }
+.badge-inshore { background: #e8f4fd; color: var(--water); }
+.badge-tarpon  { background: #e8f4ee; color: var(--green); }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(13,31,60,0.6); backdrop-filter: blur(4px);
+  z-index: 500; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 14px;
+  width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+.modal-header {
+  padding: 22px 28px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title {
+  font-family: 'Cinzel', serif; font-size: 18px;
+  font-weight: 700; color: var(--navy);
+}
+.modal-close {
+  width: 32px; height: 32px; border-radius: 8px; border: none;
+  background: #f0f2f8; color: var(--text-mid); font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.modal-close:hover { background: #e0e4f0; }
+.modal-body { padding: 24px 28px; }
+.modal-footer { padding: 16px 28px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block; margin-bottom: 6px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-mid);
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: 'Crimson Pro', serif; font-size: 16px;
+  color: var(--text-dark); background: #fafbfe; outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--navy-light); }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* SPONSOR LOGOS */
+.sponsor-logo-thumb { max-width: 80px; max-height: 32px; object-fit: contain; border-radius: 4px; }
+.comp-progress { height: 8px; background: #e8ecf4; border-radius: 4px; margin-top: 4px; }
+.comp-progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); transition: width 0.3s; }
+
+/* SETTINGS */
+.settings-section { margin-bottom: 32px; }
+.settings-title { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.admin-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f2f8; }
+.admin-info { display: flex; flex-direction: column; }
+.admin-name { font-weight: 600; color: var(--navy); }
+.admin-email { font-size: 13px; color: var(--text-mid); }
+.admin-role { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-dark); }
+
+.toggle {
+  position: relative; display: inline-block;
+  width: 44px; height: 24px;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: #d4dae8; border-radius: 24px; transition: 0.2s;
+}
+.toggle-slider:before {
+  position: absolute; content: '';
+  height: 18px; width: 18px; left: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: 0.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--green); }
+.toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text-mid); font-style: italic; font-size: 16px; }
+.loading-row { text-align: center; padding: 32px; color: var(--text-mid); font-style: italic; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--navy); color: white;
+  padding: 12px 22px; border-radius: 10px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 14px;
+  letter-spacing: 0.06em; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999; border-left: 4px solid var(--gold);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { border-left-color: #e53e3e; }
+.toast.success { border-left-color: #38a169; }
+
+@media (max-width: 700px) {
+  .topbar { padding: 0 16px; }
+  .content { padding: 16px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .form-row-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🎣 Tournament Admin</div>
+    <div class="login-sub">Rough Riders Charity Fishing 2026</div>
+    <input type="password" class="login-input" id="loginPassword" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5.5l2-2.5h14l2 2.5v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5.5z"/><path d="M8 3v18M16 3v18"/></svg>
+      Fishing Tournament Admin
+    </div>
+    <div class="topbar-right">
+      <span style="color:rgba(255,255,255,0.5);font-size:13px;font-family:'Barlow Condensed',sans-serif">June 19–20, 2026 · Treasure Island</span>
+      <a href="/register.html" class="topbar-btn">← Public Site</a>
+      <button class="topbar-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="nav-tab active" onclick="switchTab('entries',this)">Entries</button>
+    <button class="nav-tab" onclick="switchTab('sponsors',this)">Sponsors</button>
+    <button class="nav-tab" onclick="switchTab('comps',this)">Complimentary</button>
+    <button class="nav-tab" onclick="switchTab('settings',this)">Settings</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ── ENTRIES TAB ── -->
+    <div class="tab-panel active" id="panel-entries">
+      <div class="stats-row" id="entryStats">
+        <div class="stat-card"><div class="stat-label">Total Anglers</div><div class="stat-value" id="statAnglers">—</div><div class="stat-sub">registered</div></div>
+        <div class="stat-card"><div class="stat-label">Inshore</div><div class="stat-value" id="statInshore">—</div><div class="stat-sub">anglers</div></div>
+        <div class="stat-card"><div class="stat-label">Tarpon</div><div class="stat-value" id="statTarpon">—</div><div class="stat-sub">anglers</div></div>
+        <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="statRevenue">—</div><div class="stat-sub">registrations</div></div>
+      </div>
+      <div class="toolbar">
+        <input class="search-box" id="entrySearch" placeholder="Search name, email, team…" oninput="filterEntries()">
+        <button class="action-btn btn-export" onclick="exportCSV('entries')">⬇ Export CSV</button>
+        <button class="action-btn btn-primary" onclick="openAddEntry()">+ Add Entry</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Name</th><th>Email</th><th>Team / Boat</th>
+            <th>Division</th><th>Anglers</th><th>Add-ons</th>
+            <th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="entriesBody"><tr><td colspan="10" class="loading-row">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SPONSORS TAB ── -->
+    <div class="tab-panel" id="panel-sponsors">
+      <div class="stats-row" id="sponsorStats">
+        <div class="stat-card"><div class="stat-label">Total Sponsors</div><div class="stat-value" id="statSponsors">—</div></div>
+        <div class="stat-card"><div class="stat-label">Sponsor Revenue</div><div class="stat-value" id="statSponsorRev">—</div></div>
+        <div class="stat-card"><div class="stat-label">Comp Anglers</div><div class="stat-value" id="statCompAnglers">—</div><div class="stat-sub">due to sponsors</div></div>
+        <div class="stat-card"><div class="stat-label">Comp Dinners</div><div class="stat-value" id="statCompDinners">—</div><div class="stat-sub">due to sponsors</div></div>
+      </div>
+      <div class="toolbar">
+        <input class="search-box" id="sponsorSearch" placeholder="Search sponsor name, company…" oninput="filterSponsors()">
+        <button class="action-btn btn-export" onclick="exportCSV('sponsors')">⬇ Export CSV</button>
+        <button class="action-btn btn-primary" onclick="openAddSponsor()">+ Add Sponsor</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Logo</th><th>Company</th><th>Contact</th><th>Tier</th>
+            <th>Amount</th><th>Anglers</th><th>Dinners</th>
+            <th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="sponsorsBody"><tr><td colspan="9" class="loading-row">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── COMPS TAB ── -->
+    <div class="tab-panel" id="panel-comps">
+      <div class="toolbar">
+        <button class="action-btn btn-primary" onclick="openAddComp()">+ Assign Comp Entry</button>
+        <button class="action-btn btn-secondary" onclick="loadAll()">↻ Refresh</button>
+      </div>
+      <div id="compsContent">
+        <div class="loading-row">Loading…</div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ── -->
+    <div class="tab-panel" id="panel-settings">
+      <div class="settings-section">
+        <div class="settings-title">Admin Users</div>
+        <div id="adminUsersSection">
+          <div id="adminUsersList"></div>
+          <button class="action-btn btn-primary" style="margin-top:16px" onclick="openAddAdmin()">+ Add Admin</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Notification Preferences</div>
+        <div id="notifSection">
+          <div class="admin-row">
+            <div class="admin-info"><div class="admin-name">New registration email</div><div class="admin-email">Send email to admins when a new angler registers</div></div>
+            <label class="toggle"><input type="checkbox" id="notifRegistration" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="admin-row">
+            <div class="admin-info"><div class="admin-name">New sponsor email</div><div class="admin-email">Send email when a new sponsorship is submitted</div></div>
+            <label class="toggle"><input type="checkbox" id="notifSponsor" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="admin-row">
+            <div class="admin-info"><div class="admin-name">Invoice reminder email</div><div class="admin-email">Alert when an invoice remains unpaid after 7 days</div></div>
+            <label class="toggle"><input type="checkbox" id="notifInvoice" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Sponsorship Tier Reference</div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Tier</th><th>Amount</th><th>Anglers</th><th>Dinners</th><th>Benefits</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-platinum">Platinum</span></td><td>$10,000</td><td>4</td><td>16</td><td>Title sponsor all weekend events, 2 boats, vendor booth</td></tr>
+              <tr><td><span class="badge badge-gold">Gold</span></td><td>$5,000</td><td>2</td><td>8</td><td>Title sponsor, 1 boat, logo on all materials &amp; website</td></tr>
+              <tr><td><span class="badge badge-silver">Silver</span></td><td>$3,000</td><td>2</td><td>4</td><td>Scoring &amp; awards sponsor, logo on materials</td></tr>
+              <tr><td><span class="badge badge-awards">Sat. Awards</span></td><td>$2,000</td><td>1</td><td>4</td><td>Saturday awards presentation sponsor</td></tr>
+              <tr><td><span class="badge badge-friday">Fri. Captain's Mtg</span></td><td>$1,500</td><td>1</td><td>4</td><td>Friday captain's meeting sponsor</td></tr>
+              <tr><td><span class="badge badge-scoring">Scoring</span></td><td>$1,200</td><td>1</td><td>4</td><td>Tournament scoring sponsor</td></tr>
+              <tr><td><span class="badge badge-snook">Snook</span></td><td>$750</td><td>1</td><td>2</td><td>Half-page ad, logo on website</td></tr>
+              <tr><td><span class="badge badge-redfish">Redfish</span></td><td>$250</td><td>0</td><td>0</td><td>Logo on tournament website</td></tr>
+              <tr><td><span class="badge badge-bizcard">Business Card</span></td><td>$100</td><td>0</td><td>0</td><td>Small logo on website</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="entryModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="entryModalTitle">Add Entry</div><button class="modal-close" onclick="closeModal('entryModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-group"><label>First Name *</label><input type="text" id="mFirstName"></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="mLastName"></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Email *</label><input type="email" id="mEmail"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="mPhone"></div>
+      </div>
+      <div class="form-group"><label>Team / Boat Name</label><input type="text" id="mTeamName"></div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Division</label>
+          <select id="mDivision">
+            <option value="inshore">Inshore ($100/angler)</option>
+            <option value="tarpon">Tarpon ($150/angler)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Anglers</label>
+          <select id="mAnglers">
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Total ($)</label><input type="number" id="mTotal" step="0.01"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="mStatus">
+            <option value="paid">Paid</option>
+            <option value="invoice">Invoice</option>
+            <option value="pending">Pending</option>
+            <option value="comp">Complimentary</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" id="mNotes" placeholder="Internal notes"></div>
+      <input type="hidden" id="mEntryId">
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn btn-secondary" onclick="closeModal('entryModal')">Cancel</button>
+      <button class="action-btn btn-primary" onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sponsorModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="sponsorModalTitle">Add Sponsor</div><button class="modal-close" onclick="closeModal('sponsorModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-group"><label>First Name *</label><input type="text" id="sMFirst"></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="sMlast"></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Email *</label><input type="email" id="sMEmail"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="sMPhone"></div>
+      </div>
+      <div class="form-group"><label>Company *</label><input type="text" id="sMCompany"></div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Logo <span style="font-weight:400;color:var(--text-mid);font-size:11px">— optional · PNG/JPG/SVG · max 2MB</span></label>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--navy);color:white;border-radius:7px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">
+            📎 Upload Logo
+            <input type="file" id="sMLogoInput" accept="image/*" style="display:none" onchange="handleAdminLogoUpload(this)">
+          </label>
+          <span id="sMLogoFilename" style="font-size:13px;color:var(--text-mid)"></span>
+          <button type="button" id="sMLogoClear" style="display:none;background:none;border:none;cursor:pointer;color:#c53030;font-size:12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.06em" onclick="clearAdminLogo()">✕ Remove</button>
+        </div>
+        <img id="sMLogoPreview" style="display:none;max-height:50px;max-width:180px;object-fit:contain;margin-top:8px;border:1px solid var(--border);border-radius:6px;padding:4px;background:#fff" alt="Logo preview">
+        <div id="sMLogoCurrentWrap" style="display:none;margin-top:6px">
+          <span style="font-size:11px;color:var(--text-mid);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.08em;text-transform:uppercase">Current logo:</span>
+          <img id="sMLogoCurrentImg" style="max-height:36px;max-width:140px;object-fit:contain;vertical-align:middle;margin-left:8px;border:1px solid var(--border);border-radius:4px;padding:2px;background:#fff" alt="">
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Tier</label>
+          <select id="sMTier">
+            <option value="platinum">Platinum — $10,000</option>
+            <option value="gold">Gold — $5,000</option>
+            <option value="silver">Silver — $3,000</option>
+            <option value="awards">Saturday Awards — $2,000</option>
+            <option value="friday">Friday Captain's Mtg — $1,500</option>
+            <option value="scoring">Tournament Scoring — $1,200</option>
+            <option value="snook">Snook Level — $750</option>
+            <option value="redfish">Redfish Level — $250</option>
+            <option value="bizcard">Business Card — $100</option>
+            <option value="anchor">Crew (legacy) — $500</option>
+            <option value="custom">Custom / Other — $0</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="sMStatus">
+            <option value="paid">Paid</option>
+            <option value="invoice">Invoice Sent</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <input type="hidden" id="sMId">
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn btn-secondary" onclick="closeModal('sponsorModal')">Cancel</button>
+      <button class="action-btn btn-primary" onclick="saveSponsor()">Save Sponsor</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="compModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Assign Comp Entry</div><button class="modal-close" onclick="closeModal('compModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Sponsor</label>
+        <select id="cMSponsor"><option value="">— Select Sponsor —</option></select>
+      </div>
+      <div class="form-group"><label>Angler Name</label><input type="text" id="cMAngler" placeholder="Comp angler name"></div>
+      <div class="form-group"><label>Division</label>
+        <select id="cMDivision">
+          <option value="inshore">Inshore</option>
+          <option value="tarpon">Tarpon</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" id="cMNotes" placeholder="Optional notes"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn btn-secondary" onclick="closeModal('compModal')">Cancel</button>
+      <button class="action-btn btn-primary" onclick="saveComp()">Assign Comp</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Admin User</div><button class="modal-close" onclick="closeModal('adminModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Name</label><input type="text" id="aName" placeholder="Full name"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="aEmail" placeholder="admin@email.com"></div>
+      <div class="form-group"><label>Role</label>
+        <select id="aRole">
+          <option value="admin">Admin</option>
+          <option value="judge">Judge / Weigh-Master</option>
+          <option value="viewer">Viewer</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn btn-secondary" onclick="closeModal('adminModal')">Cancel</button>
+      <button class="action-btn btn-primary" onclick="saveAdmin()">Add Admin</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var TOKEN = null;
+var DATA = { entries: [], sponsors: [], comps: [], settings: { admins: [], notif: {}, version: 1 } };
+// Core tiers (admin names)
+var TIER_AMOUNTS = {
+  title:10000, platinum:10000,
+  gold:5000,   commodore:5000,
+  silver:3000,
+  awards:2000,
+  friday:1500, captain:1500,
+  scoring:1200,
+  snook:750,   bronze:1000, mate:1000,
+  redfish:250,
+  bizcard:100, anchor:500,  crew:500,
+  custom:0
+};
+var TIER_ANGLERS = {
+  title:4, platinum:4,
+  gold:2, commodore:2,
+  silver:2, awards:1,
+  friday:1, captain:1, scoring:1,
+  snook:1, bronze:0, mate:0,
+  redfish:0, bizcard:0, anchor:0, crew:0, custom:0
+};
+var TIER_DINNERS = {
+  title:16, platinum:16,
+  gold:8,   commodore:8,
+  silver:4, awards:4,
+  friday:4, captain:4, scoring:4,
+  snook:2, bronze:2, mate:2,
+  redfish:0, bizcard:0, anchor:0, crew:0, custom:0
+};
+// Map any tier ID to a display-friendly name
+var TIER_DISPLAY = {
+  platinum:'Platinum', title:'Admiral',
+  gold:'Gold', commodore:'Commodore',
+  silver:'Silver', captain:'Captain',
+  awards:'Sat. Awards', friday:"Fri. Captain's Mtg",
+  scoring:'Scoring', snook:'Snook',
+  bronze:'Mate', mate:'Mate',
+  redfish:'Redfish', bizcard:'Business Card',
+  anchor:'Crew', crew:'Crew', custom:'Custom'
+};
+var editingEntryId = null;
+var editingSponsorId = null;
+
+// ── AUTH ──
+function doLogin() {
+  var pw = document.getElementById('loginPassword').value;
+  document.getElementById('loginError').textContent = '';
+  fetch('/.netlify/functions/admin-login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res) {
+    if (res.token) {
+      TOKEN = res.token;
+      localStorage.setItem('fishingAdminToken', TOKEN);
+      showApp();
+    } else {
+      document.getElementById('loginError').textContent = 'Incorrect password.';
+    }
+  })
+  .catch(function(){ document.getElementById('loginError').textContent = 'Login failed. Try again.'; });
+}
+
+function doLogout() {
+  TOKEN = null;
+  localStorage.removeItem('fishingAdminToken');
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  loadAll();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var saved = localStorage.getItem('fishingAdminToken');
+  if (saved) { TOKEN = saved; showApp(); }
+});
+
+// ── DATA ──
+function api(method, params) {
+  var url = '/.netlify/functions/admin-data?store=fishing-admin&key=' + params.key;
+  var opts = { method: method, headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' } };
+  if (method !== 'GET') opts.body = JSON.stringify(params.body || {});
+  return fetch(url, opts).then(function(r) {
+    if (r.status === 401) { doLogout(); throw new Error('Unauthorized'); }
+    return r.json();
+  });
+}
+
+function loadAll() {
+  loadEntries();
+  loadSponsors();
+  loadComps();
+  loadSettings();
+}
+
+function loadEntries() {
+  api('GET', { key: 'entries' }).then(function(d) {
+    DATA.entries = d.value || [];
+    renderEntries(DATA.entries);
+    updateEntryStats();
+  }).catch(function(){});
+}
+
+function loadSponsors() {
+  api('GET', { key: 'sponsors' }).then(function(d) {
+    DATA.sponsors = d.value || [];
+    renderSponsors(DATA.sponsors);
+    updateSponsorStats();
+  }).catch(function(){});
+}
+
+function loadComps() {
+  api('GET', { key: 'comps' }).then(function(d) {
+    DATA.comps = d.value || [];
+    renderComps();
+  }).catch(function(){});
+}
+
+function loadSettings() {
+  api('GET', { key: 'settings' }).then(function(d) {
+    DATA.settings = d.value || { admins: [], notif: {}, version: 1 };
+    renderSettings();
+  }).catch(function(){});
+}
+
+// ── ENTRIES ──
+function renderEntries(entries) {
+  var tbody = document.getElementById('entriesBody');
+  if (!entries.length) { tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No entries yet</td></tr>'; return; }
+  tbody.innerHTML = entries.map(function(e) {
+    return '<tr>' +
+      '<td><strong>' + esc(e.firstName) + ' ' + esc(e.lastName) + '</strong></td>' +
+      '<td>' + esc(e.email) + '</td>' +
+      '<td>' + esc(e.teamName || '—') + '</td>' +
+      '<td><span class="badge badge-' + e.division + '">' + (e.division === 'inshore' ? 'Inshore' : 'Tarpon') + '</span></td>' +
+      '<td>' + (e.anglers || 1) + '</td>' +
+      '<td>' + esc((e.addons || []).join(', ') || '—') + '</td>' +
+      '<td>$' + parseFloat(e.total || 0).toFixed(2) + '</td>' +
+      '<td><span class="badge badge-' + e.status + '">' + e.status + '</span></td>' +
+      '<td style="font-size:13px;color:var(--text-mid)">' + formatDate(e.createdAt) + '</td>' +
+      '<td class="actions">' +
+        '<button class="action-btn btn-secondary" style="padding:5px 10px;font-size:11px" onclick="editEntry(\'' + e.id + '\')">Edit</button> ' +
+        '<button class="action-btn btn-danger" style="padding:5px 10px;font-size:11px" onclick="deleteEntry(\'' + e.id + '\')">Del</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function filterEntries() {
+  var q = document.getElementById('entrySearch').value.toLowerCase();
+  var filtered = DATA.entries.filter(function(e) {
+    return (e.firstName + ' ' + e.lastName + ' ' + e.email + ' ' + (e.teamName || '')).toLowerCase().includes(q);
+  });
+  renderEntries(filtered);
+}
+
+function updateEntryStats() {
+  var entries = DATA.entries;
+  document.getElementById('statAnglers').textContent = entries.reduce(function(s,e){ return s + (parseInt(e.anglers)||1); }, 0);
+  document.getElementById('statInshore').textContent = entries.filter(function(e){ return e.division === 'inshore'; }).reduce(function(s,e){ return s + (parseInt(e.anglers)||1); }, 0);
+  document.getElementById('statTarpon').textContent = entries.filter(function(e){ return e.division === 'tarpon'; }).reduce(function(s,e){ return s + (parseInt(e.anglers)||1); }, 0);
+  document.getElementById('statRevenue').textContent = '$' + entries.reduce(function(s,e){ return s + parseFloat(e.total||0); }, 0).toLocaleString();
+}
+
+function openAddEntry() {
+  editingEntryId = null;
+  document.getElementById('entryModalTitle').textContent = 'Add Entry';
+  clearModal(['mFirstName','mLastName','mEmail','mPhone','mTeamName','mNotes','mTotal']);
+  document.getElementById('mDivision').value = 'inshore';
+  document.getElementById('mAnglers').value = '1';
+  document.getElementById('mStatus').value = 'paid';
+  document.getElementById('mEntryId').value = '';
+  openModal('entryModal');
+}
+
+function editEntry(id) {
+  var e = DATA.entries.find(function(x){ return x.id === id; });
+  if (!e) return;
+  editingEntryId = id;
+  document.getElementById('entryModalTitle').textContent = 'Edit Entry';
+  document.getElementById('mFirstName').value = e.firstName || '';
+  document.getElementById('mLastName').value = e.lastName || '';
+  document.getElementById('mEmail').value = e.email || '';
+  document.getElementById('mPhone').value = e.phone || '';
+  document.getElementById('mTeamName').value = e.teamName || '';
+  document.getElementById('mDivision').value = e.division || 'inshore';
+  document.getElementById('mAnglers').value = e.anglers || '1';
+  document.getElementById('mTotal').value = e.total || '';
+  document.getElementById('mStatus').value = e.status || 'paid';
+  document.getElementById('mNotes').value = e.notes || '';
+  document.getElementById('mEntryId').value = id;
+  openModal('entryModal');
+}
+
+function saveEntry() {
+  var record = {
+    firstName: document.getElementById('mFirstName').value.trim(),
+    lastName: document.getElementById('mLastName').value.trim(),
+    email: document.getElementById('mEmail').value.trim(),
+    phone: document.getElementById('mPhone').value.trim(),
+    teamName: document.getElementById('mTeamName').value.trim(),
+    division: document.getElementById('mDivision').value,
+    anglers: parseInt(document.getElementById('mAnglers').value),
+    total: parseFloat(document.getElementById('mTotal').value) || 0,
+    status: document.getElementById('mStatus').value,
+    notes: document.getElementById('mNotes').value.trim()
+  };
+  if (!record.firstName || !record.lastName || !record.email) { showToast('Name and email required.', 'error'); return; }
+  var entries = DATA.entries.slice();
+  if (editingEntryId) {
+    var idx = entries.findIndex(function(e){ return e.id === editingEntryId; });
+    if (idx >= 0) { entries[idx] = Object.assign({}, entries[idx], record, { updatedAt: new Date().toISOString() }); }
+  } else {
+    record.id = 'E' + Date.now();
+    record.createdAt = new Date().toISOString();
+    entries.push(record);
+  }
+  api('PUT', { key: 'entries', body: { value: entries } }).then(function() {
+    DATA.entries = entries;
+    renderEntries(entries);
+    updateEntryStats();
+    closeModal('entryModal');
+    showToast('Entry saved.', 'success');
+  }).catch(function(){ showToast('Save failed.', 'error'); });
+}
+
+function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  var entries = DATA.entries.filter(function(e){ return e.id !== id; });
+  api('PUT', { key: 'entries', body: { value: entries } }).then(function() {
+    DATA.entries = entries;
+    renderEntries(entries);
+    updateEntryStats();
+    showToast('Entry deleted.', 'success');
+  });
+}
+
+// ── SPONSORS ──
+function renderSponsors(sponsors) {
+  var tbody = document.getElementById('sponsorsBody');
+  if (!sponsors.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No sponsors yet</td></tr>'; return; }
+  tbody.innerHTML = sponsors.map(function(s) {
+    var anglers = TIER_ANGLERS[s.tierId] || 0;
+    var dinners = TIER_DINNERS[s.tierId] || 0;
+    var used = (DATA.comps || []).filter(function(c){ return c.sponsorId === s.id; }).length;
+    return '<tr>' +
+      '<td>' + (s.logo ? '<img src="' + s.logo + '" class="sponsor-logo-thumb" alt="' + esc(s.company) + '">' : '<span style="color:var(--text-mid);font-size:13px">—</span>') + '</td>' +
+      '<td><strong>' + esc(s.company) + '</strong></td>' +
+      '<td>' + esc(s.firstName) + ' ' + esc(s.lastName) + '<br><span style="font-size:13px;color:var(--text-mid)">' + esc(s.email) + '</span></td>' +
+      '<td><span class="badge badge-' + (s.tierId||'custom') + '">' + esc(s.tierName || TIER_DISPLAY[s.tierId] || s.tierId) + '</span></td>' +
+      '<td>$' + (s.amount || TIER_AMOUNTS[s.tierId] || 0).toLocaleString() + '</td>' +
+      '<td>' + (anglers > 0 ? used + ' / ' + anglers : '—') + '</td>' +
+      '<td>' + (dinners > 0 ? dinners : '—') + '</td>' +
+      '<td><span class="badge badge-' + s.status + '">' + s.status + '</span></td>' +
+      '<td class="actions">' +
+        '<button class="action-btn btn-secondary" style="padding:5px 10px;font-size:11px" onclick="editSponsor(\'' + s.id + '\')">Edit</button> ' +
+        '<button class="action-btn btn-danger" style="padding:5px 10px;font-size:11px" onclick="deleteSponsor(\'' + s.id + '\')">Del</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function filterSponsors() {
+  var q = document.getElementById('sponsorSearch').value.toLowerCase();
+  var filtered = DATA.sponsors.filter(function(s){
+    return (s.company + ' ' + s.firstName + ' ' + s.lastName).toLowerCase().includes(q);
+  });
+  renderSponsors(filtered);
+}
+
+function updateSponsorStats() {
+  var sponsors = DATA.sponsors;
+  var paid = sponsors.filter(function(s){ return s.status === 'paid' || s.status === 'invoice'; });
+  document.getElementById('statSponsors').textContent = paid.length;
+  document.getElementById('statSponsorRev').textContent = '$' + paid.reduce(function(s,sp){ return s + (sp.amount || TIER_AMOUNTS[sp.tierId] || 0); }, 0).toLocaleString();
+  document.getElementById('statCompAnglers').textContent = paid.reduce(function(s,sp){ return s + (TIER_ANGLERS[sp.tierId]||0); }, 0);
+  document.getElementById('statCompDinners').textContent = paid.reduce(function(s,sp){ return s + (TIER_DINNERS[sp.tierId]||0); }, 0);
+}
+
+function openAddSponsor() {
+  editingSponsorId = null;
+  document.getElementById('sponsorModalTitle').textContent = 'Add Sponsor';
+  clearModal(['sMFirst','sMlast','sMEmail','sMPhone','sMCompany']);
+  document.getElementById('sMTier').value = 'gold';
+  document.getElementById('sMLogoInput').value = '';
+  document.getElementById('sMLogoPreview').style.display = 'none';
+  sponsorLogoData = null;
+  document.getElementById('sMStatus').value = 'paid';
+  document.getElementById('sMId').value = '';
+  openModal('sponsorModal');
+}
+
+function editSponsor(id) {
+  var s = DATA.sponsors.find(function(x){ return x.id === id; });
+  if (!s) return;
+  editingSponsorId = id;
+  sponsorLogoData = null;
+  document.getElementById('sponsorModalTitle').textContent = 'Edit Sponsor';
+  document.getElementById('sMFirst').value = s.firstName || '';
+  document.getElementById('sMlast').value = s.lastName || '';
+  document.getElementById('sMEmail').value = s.email || '';
+  document.getElementById('sMPhone').value = s.phone || '';
+  document.getElementById('sMCompany').value = s.company || '';
+  document.getElementById('sMTier').value = s.tierId || 'gold';
+  document.getElementById('sMStatus').value = s.status || 'paid';
+  document.getElementById('sMId').value = id;
+  // reset upload UI
+  document.getElementById('sMLogoInput').value = '';
+  document.getElementById('sMLogoPreview').style.display = 'none';
+  document.getElementById('sMLogoFilename').textContent = '';
+  document.getElementById('sMLogoClear').style.display = 'none';
+  // show existing logo if present
+  var curWrap = document.getElementById('sMLogoCurrentWrap');
+  var curImg  = document.getElementById('sMLogoCurrentImg');
+  if (s.logo) {
+    curImg.src = s.logo;
+    curWrap.style.display = 'block';
+  } else {
+    curWrap.style.display = 'none';
+  }
+  openModal('sponsorModal');
+}
+
+var sponsorLogoData = null;
+
+function handleAdminLogoUpload(input) {
+  var file = input.files[0]; if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('Logo must be under 2MB.', 'error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    sponsorLogoData = e.target.result;
+    var prev = document.getElementById('sMLogoPreview');
+    prev.src = sponsorLogoData; prev.style.display = 'block';
+    document.getElementById('sMLogoFilename').textContent = file.name;
+    document.getElementById('sMLogoClear').style.display = 'inline';
+    // hide existing logo since new one is replacing it
+    document.getElementById('sMLogoCurrentWrap').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearAdminLogo() {
+  sponsorLogoData = null;
+  document.getElementById('sMLogoInput').value = '';
+  document.getElementById('sMLogoPreview').style.display = 'none';
+  document.getElementById('sMLogoFilename').textContent = '';
+  document.getElementById('sMLogoClear').style.display = 'none';
+}
+
+function saveSponsor() {
+  var tierId = document.getElementById('sMTier').value;
+  var tierNames = TIER_DISPLAY;
+  var record = {
+    firstName: document.getElementById('sMFirst').value.trim(),
+    lastName: document.getElementById('sMlast').value.trim(),
+    email: document.getElementById('sMEmail').value.trim(),
+    phone: document.getElementById('sMPhone').value.trim(),
+    company: document.getElementById('sMCompany').value.trim(),
+    tierId: tierId, tierName: tierNames[tierId],
+    amount: TIER_AMOUNTS[tierId],
+    status: document.getElementById('sMStatus').value
+  };
+  // include logo: new upload wins; otherwise keep existing
+  if (sponsorLogoData) {
+    record.logo = sponsorLogoData;
+  }
+  if (!record.company || !record.email) { showToast('Company and email required.', 'error'); return; }
+  var sponsors = DATA.sponsors.slice();
+  if (editingSponsorId) {
+    var idx = sponsors.findIndex(function(s){ return s.id === editingSponsorId; });
+    if (idx >= 0) sponsors[idx] = Object.assign({}, sponsors[idx], record, { updatedAt: new Date().toISOString() });
+  } else {
+    record.id = 'S' + Date.now();
+    record.createdAt = new Date().toISOString();
+    sponsors.push(record);
+  }
+  api('PUT', { key: 'sponsors', body: { value: sponsors } }).then(function() {
+    DATA.sponsors = sponsors;
+    renderSponsors(sponsors);
+    updateSponsorStats();
+    closeModal('sponsorModal');
+    showToast('Sponsor saved.', 'success');
+  }).catch(function(){ showToast('Save failed.', 'error'); });
+}
+
+function deleteSponsor(id) {
+  if (!confirm('Delete this sponsor?')) return;
+  var sponsors = DATA.sponsors.filter(function(s){ return s.id !== id; });
+  api('PUT', { key: 'sponsors', body: { value: sponsors } }).then(function() {
+    DATA.sponsors = sponsors;
+    renderSponsors(sponsors);
+    updateSponsorStats();
+    showToast('Sponsor deleted.', 'success');
+  });
+}
+
+// ── COMPS ──
+function renderComps() {
+  var div = document.getElementById('compsContent');
+  if (!DATA.sponsors.length) { div.innerHTML = '<div class="empty-state">No sponsors yet — add sponsors first to manage comp entries.</div>'; return; }
+  var paidSponsors = DATA.sponsors.filter(function(s){ return (s.status === 'paid' || s.status === 'invoice') && TIER_ANGLERS[s.tierId] > 0; });
+  if (!paidSponsors.length) { div.innerHTML = '<div class="empty-state">No sponsors with complimentary angler slots yet.</div>'; return; }
+  div.innerHTML = paidSponsors.map(function(s) {
+    var total = TIER_ANGLERS[s.tierId] || 0;
+    var comps = DATA.comps.filter(function(c){ return c.sponsorId === s.id; });
+    var used = comps.length;
+    var pct = total > 0 ? Math.round((used/total)*100) : 0;
+    return '<div class="card" style="margin-bottom:20px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+        '<div>' +
+          '<div style="font-family:\'Cinzel\',serif;font-weight:700;font-size:16px;color:var(--navy)">' + esc(s.company) + '</div>' +
+          '<div style="font-size:14px;color:var(--text-mid)">' + esc(s.firstName) + ' ' + esc(s.lastName) + ' · <span class="badge badge-' + s.tierId + '">' + esc(s.tierName) + '</span></div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="font-family:\'Cinzel\',serif;font-size:18px;font-weight:700;color:var(--navy)">' + used + ' / ' + total + '</div>' +
+          '<div style="font-size:12px;color:var(--text-mid)">slots used</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="comp-progress"><div class="comp-progress-fill" style="width:' + pct + '%"></div></div>' +
+      (comps.length ? '<div style="margin-top:14px"><table class="data-table" style="font-size:14px"><thead><tr><th>Angler</th><th>Division</th><th>Notes</th><th></th></tr></thead><tbody>' +
+        comps.map(function(c) {
+          return '<tr><td>' + esc(c.angler||'—') + '</td><td><span class="badge badge-' + c.division + '">' + c.division + '</span></td><td style="color:var(--text-mid)">' + esc(c.notes||'') + '</td>' +
+            '<td><button class="action-btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="deleteComp(\'' + c.id + '\')">Remove</button></td></tr>';
+        }).join('') +
+      '</tbody></table></div>' : '') +
+      (used < total ? '<button class="action-btn btn-primary" style="margin-top:12px" onclick="openAddCompForSponsor(\'' + s.id + '\')">+ Assign Comp Slot</button>' : '<div style="margin-top:12px;color:var(--green);font-size:13px;font-style:italic">All ' + total + ' slots filled</div>') +
+    '</div>';
+  }).join('');
+}
+
+function openAddComp() {
+  var select = document.getElementById('cMSponsor');
+  select.innerHTML = '<option value="">— Select Sponsor —</option>' +
+    DATA.sponsors.filter(function(s){ return TIER_ANGLERS[s.tierId] > 0; }).map(function(s){
+      return '<option value="' + s.id + '">' + esc(s.company) + ' (' + s.tierName + ')</option>';
+    }).join('');
+  document.getElementById('cMAngler').value = '';
+  document.getElementById('cMDivision').value = 'inshore';
+  document.getElementById('cMNotes').value = '';
+  openModal('compModal');
+}
+
+function openAddCompForSponsor(sponsorId) {
+  openAddComp();
+  document.getElementById('cMSponsor').value = sponsorId;
+}
+
+function saveComp() {
+  var sponsorId = document.getElementById('cMSponsor').value;
+  if (!sponsorId) { showToast('Please select a sponsor.', 'error'); return; }
+  var sponsor = DATA.sponsors.find(function(s){ return s.id === sponsorId; });
+  var used = DATA.comps.filter(function(c){ return c.sponsorId === sponsorId; }).length;
+  if (used >= (TIER_ANGLERS[sponsor.tierId] || 0)) { showToast('No remaining comp slots for this sponsor.', 'error'); return; }
+  var record = {
+    id: 'C' + Date.now(),
+    sponsorId: sponsorId,
+    angler: document.getElementById('cMAngler').value.trim(),
+    division: document.getElementById('cMDivision').value,
+    notes: document.getElementById('cMNotes').value.trim(),
+    createdAt: new Date().toISOString()
+  };
+  var comps = DATA.comps.concat([record]);
+  api('PUT', { key: 'comps', body: { value: comps } }).then(function() {
+    DATA.comps = comps;
+    renderComps();
+    closeModal('compModal');
+    showToast('Comp slot assigned.', 'success');
+  });
+}
+
+function deleteComp(id) {
+  if (!confirm('Remove this comp entry?')) return;
+  var comps = DATA.comps.filter(function(c){ return c.id !== id; });
+  api('PUT', { key: 'comps', body: { value: comps } }).then(function() {
+    DATA.comps = comps;
+    renderComps();
+    showToast('Comp entry removed.', 'success');
+  });
+}
+
+// ── SETTINGS ──
+function renderSettings() {
+  var s = DATA.settings;
+  // Admins
+  var ul = document.getElementById('adminUsersList');
+  ul.innerHTML = (s.admins || []).map(function(a, i) {
+    return '<div class="admin-row">' +
+      '<div class="admin-info"><div class="admin-name">' + esc(a.name) + '</div><div class="admin-email">' + esc(a.email) + '</div></div>' +
+      '<div style="display:flex;align-items:center;gap:10px"><div class="admin-role">' + esc(a.role) + '</div>' +
+      '<button class="action-btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="removeAdmin(' + i + ')">Remove</button></div>' +
+    '</div>';
+  }).join('') || '<div style="color:var(--text-mid);font-style:italic;padding:10px 0">No additional admins yet.</div>';
+  // Notif
+  if (s.notif) {
+    document.getElementById('notifRegistration').checked = !!s.notif.registration;
+    document.getElementById('notifSponsor').checked = !!s.notif.sponsor;
+    document.getElementById('notifInvoice').checked = !!s.notif.invoice;
+  }
+}
+
+function openAddAdmin() { clearModal(['aName','aEmail']); document.getElementById('aRole').value = 'admin'; openModal('adminModal'); }
+
+function saveAdmin() {
+  var name = document.getElementById('aName').value.trim();
+  var email = document.getElementById('aEmail').value.trim();
+  var role = document.getElementById('aRole').value;
+  if (!name || !email) { showToast('Name and email required.', 'error'); return; }
+  DATA.settings.admins = DATA.settings.admins || [];
+  DATA.settings.admins.push({ name: name, email: email, role: role });
+  saveSettings();
+  closeModal('adminModal');
+}
+
+function removeAdmin(idx) {
+  if (!confirm('Remove this admin?')) return;
+  DATA.settings.admins.splice(idx, 1);
+  saveSettings();
+}
+
+function saveSettings() {
+  DATA.settings.notif = {
+    registration: document.getElementById('notifRegistration').checked,
+    sponsor: document.getElementById('notifSponsor').checked,
+    invoice: document.getElementById('notifInvoice').checked
+  };
+  api('PUT', { key: 'settings', body: { value: DATA.settings } }).then(function() {
+    renderSettings();
+    showToast('Settings saved.', 'success');
+  });
+}
+
+// ── EXPORT ──
+function exportCSV(type) {
+  var rows = [];
+  if (type === 'entries') {
+    rows.push(['ID','First','Last','Email','Phone','Team','Division','Anglers','Add-ons','Total','Status','Date']);
+    DATA.entries.forEach(function(e) {
+      rows.push([e.id,e.firstName,e.lastName,e.email,e.phone||'',e.teamName||'',e.division,e.anglers||1,(e.addons||[]).join('|'),e.total||0,e.status,e.createdAt||'']);
+    });
+  } else {
+    rows.push(['ID','Company','First','Last','Email','Phone','Tier','Amount','Anglers','Dinners','Status','Date']);
+    DATA.sponsors.forEach(function(s) {
+      rows.push([s.id,s.company,s.firstName,s.lastName,s.email,s.phone||'',s.tierName||s.tierId,s.amount||0,TIER_ANGLERS[s.tierId]||0,TIER_DINNERS[s.tierId]||0,s.status,s.createdAt||'']);
+    });
+  }
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'fishing-' + type + '-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ── TABS ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.nav-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── MODAL HELPERS ──
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function clearModal(ids) { ids.forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; }); }
+document.querySelectorAll('.modal-overlay').forEach(function(el) {
+  el.addEventListener('click', function(e){ if(e.target === el) el.classList.remove('open'); });
+});
+
+// ── HELPERS ──
+function formatDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'2-digit'}); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 4000);
+}
+</script>
+</body>
+</html>
