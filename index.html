@@ -334,6 +334,74 @@
   .empty-state p { font-family: 'Lora', serif; font-style: italic; }
 
 
+
+  /* ── GALLERY ── */
+  .gallery-main {
+    width: 100%; aspect-ratio: 4/3;
+    object-fit: contain; display: block;
+    background: #f0ebe0; border-radius: 6px 6px 0 0;
+    cursor: zoom-in; transition: opacity .15s;
+    border: 1px solid var(--border-light); border-bottom: none;
+  }
+  .gallery-main:hover { opacity: .88; }
+  .gallery-thumbs {
+    display: flex; gap: 4px; padding: 4px;
+    background: #e8e0d0; border: 1px solid var(--border-light);
+    border-top: none; border-radius: 0 0 6px 6px;
+    overflow-x: auto;
+  }
+  .gallery-thumb {
+    width: 56px; height: 48px; flex-shrink: 0;
+    object-fit: contain; background: #f8f4ec;
+    border-radius: 3px; cursor: pointer;
+    border: 2px solid transparent; transition: border-color .15s;
+    padding: 2px;
+  }
+  .gallery-thumb.active { border-color: var(--navy); }
+  .gallery-thumb:hover:not(.active) { border-color: var(--gold); }
+
+  /* Admin multi-upload grid */
+  .upload-slots {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 10px;
+  }
+  .upload-slot {
+    border: 2px dashed var(--border); border-radius: 6px;
+    aspect-ratio: 4/3; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--page-bg); position: relative;
+    overflow: hidden; cursor: pointer; transition: border-color .15s;
+    font-size: 11px; color: var(--text-dim); text-align: center;
+  }
+  .upload-slot:hover { border-color: var(--navy); }
+  .upload-slot.has-img { border-style: solid; border-color: var(--border); }
+  .upload-slot img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; padding: 4px;
+  }
+  .upload-slot input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+  .upload-slot .slot-remove {
+    position: absolute; top: 3px; right: 3px;
+    background: rgba(0,0,0,.55); color: white;
+    border: none; border-radius: 50%; width: 18px; height: 18px;
+    font-size: 10px; cursor: pointer; display: none;
+    align-items: center; justify-content: center; z-index: 2;
+    line-height: 1;
+  }
+  .upload-slot.has-img .slot-remove { display: flex; }
+  .upload-slot .slot-num {
+    font-size: 22px; color: var(--border); margin-bottom: 4px;
+  }
+  .upload-slot .slot-label { font-size: 11px; color: var(--text-dim); }
+  .upload-slot-progress {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(13,31,60,.7); color: var(--gold);
+    font-size: 10px; padding: 3px; text-align: center; z-index: 3;
+  }
+
   /* ── LIGHTBOX ── */
   #lightbox {
     display: none; position: fixed; inset: 0;
@@ -472,22 +540,12 @@
           <textarea id="f-description" placeholder="Describe the item, value, donor, etc."></textarea>
         </div>
 
-        <!-- IMAGE UPLOAD -->
+        <!-- MULTI-IMAGE UPLOAD (up to 4) -->
         <div class="form-group">
-          <label>Item Photo</label>
-          <div class="img-upload-area" id="upload-area">
-            <input type="file" id="f-image-file" accept="image/*" onchange="handleImageSelect(event)">
-            <span class="upload-icon">📷</span>
-            <p><strong>Click to upload</strong> or drag &amp; drop</p>
-            <p>JPG, PNG, GIF up to 5MB</p>
-            <img id="img-preview" class="img-preview" alt="Preview">
-          </div>
-          <div id="upload-progress" class="img-upload-progress">⏳ Uploading image…</div>
+          <label>Item Photos <span style="font-weight:400;color:var(--text-dim)">(up to 4 &mdash; first is the main image)</span></label>
+          <div class="upload-slots" id="upload-slots"></div>
+          <div id="upload-progress" style="font-size:13px;color:var(--gold-dim);margin-top:4px;display:none">&#x23F3; Uploading&hellip;</div>
           <input type="hidden" id="f-image-url">
-          <div style="margin-top:8px">
-            <label style="margin-bottom:4px">Or paste an image URL</label>
-            <input type="url" id="f-image-url-manual" placeholder="https://..." oninput="syncImageUrl(this.value)">
-          </div>
         </div>
 
         <div class="form-row">
@@ -613,7 +671,12 @@
     <p class="item-cat" id="modal-cat" style="color:var(--gold-dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px"></p>
     <h2 id="modal-title"></h2>
     <p class="modal-meta" id="modal-meta"></p>
-    <img id="modal-img" class="modal-img" src="" alt="" style="display:none" onclick="openLightbox(this.src, document.getElementById('modal-title').textContent)">
+    <!-- Gallery display in modal -->
+  <div id="modal-gallery" style="display:none;margin-bottom:16px">
+    <img id="modal-gallery-main" class="gallery-main" src="" alt=""
+      onclick="openLightbox(this.src, document.getElementById('modal-title').textContent)">
+    <div class="gallery-thumbs" id="modal-gallery-thumbs"></div>
+  </div>
     <p class="modal-desc" id="modal-desc"></p>
 
     <div class="current-bid-box">
@@ -830,16 +893,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Drag & drop
-  const area = document.getElementById('upload-area');
-  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
-  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
-  area.addEventListener('drop', e => {
-    e.preventDefault();
-    area.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) processImageFile(file);
-  });
+  // Init upload slots when admin panel opens
+  // (handled in adminLogin)
 });
 
 /* ═══════════════════════════ COUNTDOWN ═══════════════════════════ */
@@ -881,10 +936,18 @@ function itemCardHTML(item) {
   const bid = item.current_bid || item.starting_bid || 0;
   const count = item.bid_count || 0;
   const icon = categoryIcon(item.category);
-  const imgHTML = item.image_url
-    ? `<img class="item-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onclick="event.stopPropagation();openLightbox('${esc(item.image_url)}','${esc(item.title)}')" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+  const imgs = getItemImages(item);
+  const primaryImg = imgs[0] || null;
+  const hasMulti = imgs.length > 1;
+  const imgHTML = primaryImg
+    ? `<div style="position:relative">
+        <img class="item-img" src="${esc(primaryImg)}" alt="${esc(item.title)}"
+          onclick="event.stopPropagation();openLightbox('${esc(primaryImg)}','${esc(item.title)}')"
+          onerror="this.style.display='none'">
+        ${hasMulti ? `<span style="position:absolute;bottom:6px;right:8px;background:rgba(13,31,60,.65);color:white;font-size:11px;padding:2px 7px;border-radius:10px">+${imgs.length-1} more</span>` : ''}
+      </div>`
     : '';
-  const placeholderStyle = item.image_url ? 'display:none' : '';
+  const placeholderStyle = primaryImg ? 'display:none' : '';
   const statusLabel = item.status === 'open' ? 'Open' : item.status === 'upcoming' ? 'Soon' : 'Closed';
   return `
   <div class="item-card${item.status==='closed'?' closed':''}" onclick="openItem('${item.id}')">
@@ -931,8 +994,28 @@ async function openItem(id) {
   document.getElementById('modal-cat').textContent = item.category || '';
   document.getElementById('modal-title').textContent = item.title;
   document.getElementById('modal-meta').textContent = `Starting bid: $${(item.starting_bid||0).toLocaleString()} · Min increment: $${(item.min_increment||5).toLocaleString()}`;
-  const img = document.getElementById('modal-img');
-  if (item.image_url) { img.src = item.image_url; img.style.display = 'block'; } else { img.style.display = 'none'; }
+  // Render gallery
+  const imgs = getItemImages(item);
+  const galleryDiv = document.getElementById('modal-gallery');
+  if (imgs.length > 0) {
+    galleryDiv.style.display = 'block';
+    const mainImg = document.getElementById('modal-gallery-main');
+    mainImg.src = imgs[0];
+    mainImg.alt = item.title;
+    const thumbsDiv = document.getElementById('modal-gallery-thumbs');
+    if (imgs.length > 1) {
+      thumbsDiv.style.display = 'flex';
+      thumbsDiv.innerHTML = imgs.map((src, i) =>
+        `<img class="gallery-thumb${i===0?' active':''}" src="${esc(src)}" alt="Photo ${i+1}"
+          onclick="setGalleryMain(this,'${esc(src)}')">`
+      ).join('');
+    } else {
+      thumbsDiv.style.display = 'none';
+      thumbsDiv.innerHTML = '';
+    }
+  } else {
+    galleryDiv.style.display = 'none';
+  }
   document.getElementById('modal-desc').textContent = item.description || '';
   updateModalBidInfo(item);
 
@@ -1141,44 +1224,84 @@ async function lookupMyBids() {
 }
 
 /* ═══════════════════════════ IMAGE UPLOAD ═══════════════════════════ */
-function handleImageSelect(e) {
-  const file=e.target.files[0];
-  if(file) processImageFile(file);
+/* ═══════════════════════════ MULTI-IMAGE GALLERY ═══════════════════════════ */
+let itemImages = ['','','','']; // up to 4 URLs, index 0 = primary
+
+function getItemImages(item) {
+  // Try images JSON array first, fall back to image_url
+  if (item.images) {
+    try {
+      const arr = typeof item.images === 'string' ? JSON.parse(item.images) : item.images;
+      const filtered = arr.filter(u => u && u.trim());
+      if (filtered.length) return filtered;
+    } catch {}
+  }
+  if (item.image_url) return [item.image_url];
+  return [];
 }
 
-function processImageFile(file) {
-  if(file.size>5*1024*1024) { showToast('Image must be under 5MB.'); return; }
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const preview=document.getElementById('img-preview');
-    preview.src=e.target.result;
-    preview.style.display='block';
+function setGalleryMain(thumbEl, src) {
+  document.getElementById('modal-gallery-main').src = src;
+  document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+  thumbEl.classList.add('active');
+}
+
+function initUploadSlots() {
+  const container = document.getElementById('upload-slots');
+  if (!container) return;
+  container.innerHTML = itemImages.map((url, i) => `
+    <div class="upload-slot${url?' has-img':''}" id="slot-${i}">
+      <input type="file" accept="image/*" onchange="handleSlotFile(event,${i})" title="Photo ${i+1}">
+      ${url ? `<img src="${esc(url)}" alt="Photo ${i+1}">` : `<span class="slot-num">${i+1}</span><span class="slot-label">Photo ${i+1}</span>`}
+      <button class="slot-remove" onclick="removeSlotImage(event,${i})" title="Remove">&#x2715;</button>
+      <div class="upload-slot-progress" id="slot-prog-${i}" style="display:none">Uploading…</div>
+    </div>`).join('');
+}
+
+function handleSlotFile(e, idx) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { showToast('Image must be under 5MB.'); return; }
+  // Show local preview immediately
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const slot = document.getElementById('slot-'+idx);
+    slot.classList.add('has-img');
+    slot.querySelector('img')?.remove();
+    slot.querySelector('.slot-num')?.remove();
+    slot.querySelector('.slot-label')?.remove();
+    const img = document.createElement('img');
+    img.src = ev.target.result;
+    slot.insertBefore(img, slot.querySelector('.slot-remove'));
   };
   reader.readAsDataURL(file);
-  uploadImageFile(file);
+  uploadSlotFile(file, idx);
 }
 
-async function uploadImageFile(file) {
-  const prog=document.getElementById('upload-progress');
-  prog.style.display='block';
-  prog.textContent='⏳ Uploading image…';
+async function uploadSlotFile(file, idx) {
+  const prog = document.getElementById('slot-prog-'+idx);
+  if (prog) { prog.style.display='block'; prog.textContent='Uploading…'; }
   try {
-    const url=await sbStorage(file);
-    document.getElementById('f-image-url').value=url;
-    document.getElementById('f-image-url-manual').value=url;
-    prog.textContent='✅ Image uploaded!';
-    setTimeout(()=>prog.style.display='none',2000);
+    const url = await sbStorage(file);
+    itemImages[idx] = url;
+    syncImagesHidden();
+    if (prog) { prog.textContent='✓'; setTimeout(()=>prog.style.display='none',1500); }
   } catch(e) {
-    prog.textContent='❌ Upload failed — try pasting a URL instead.';
-    prog.style.color='var(--red)';
+    if (prog) { prog.textContent='Failed'; prog.style.color='#c0392b'; setTimeout(()=>prog.style.display='none',3000); }
+    showToast('Upload failed: ' + e.message);
   }
 }
 
-function syncImageUrl(val) {
-  document.getElementById('f-image-url').value=val;
-  const preview=document.getElementById('img-preview');
-  if(val) { preview.src=val; preview.style.display='block'; }
-  else { preview.style.display='none'; }
+function removeSlotImage(e, idx) {
+  e.preventDefault(); e.stopPropagation();
+  itemImages[idx] = '';
+  syncImagesHidden();
+  initUploadSlots();
+}
+
+function syncImagesHidden() {
+  const filled = itemImages.filter(u => u);
+  document.getElementById('f-image-url').value = filled[0] || '';
 }
 
 /* ═══════════════════════════ ADMIN ═══════════════════════════ */
@@ -1187,6 +1310,8 @@ function adminLogin() {
     adminLoggedIn=true;
     document.getElementById('admin-login-form').style.display='none';
     document.getElementById('admin-panel').classList.add('visible');
+    itemImages=['','','',''];
+    initUploadSlots();
     loadAdminData();
   } else { document.getElementById('admin-login-err').style.display='block'; }
 }
@@ -1246,12 +1371,13 @@ async function loadAdminBids() {
 
 async function saveItem() {
   const id=document.getElementById('edit-item-id').value;
-  const imageUrl=document.getElementById('f-image-url').value||document.getElementById('f-image-url-manual').value||null;
+  const imageUrl=document.getElementById('f-image-url').value||null;
   const payload={
     title:document.getElementById('f-title').value.trim(),
     description:document.getElementById('f-description').value.trim(),
     category:document.getElementById('f-category').value,
     image_url:imageUrl||null,
+    images: JSON.stringify(itemImages.filter(u=>u)),
     starting_bid:parseFloat(document.getElementById('f-start-bid').value)||0,
     min_increment:parseFloat(document.getElementById('f-increment').value)||5,
     status:document.getElementById('f-status').value,
@@ -1279,10 +1405,17 @@ function editItem(id) {
   document.getElementById('f-title').value=item.title||'';
   document.getElementById('f-description').value=item.description||'';
   document.getElementById('f-category').value=item.category||'General';
-  document.getElementById('f-image-url').value=item.image_url||'';
-  document.getElementById('f-image-url-manual').value=item.image_url||'';
-  const preview=document.getElementById('img-preview');
-  if(item.image_url){preview.src=item.image_url;preview.style.display='block';}else{preview.style.display='none';}
+  // Restore images array
+  if (item.images) {
+    try {
+      const arr = typeof item.images === 'string' ? JSON.parse(item.images) : item.images;
+      itemImages = [...arr, '', '', '', ''].slice(0, 4);
+    } catch { itemImages = [item.image_url||'','','','']; }
+  } else {
+    itemImages = [item.image_url||'','','',''];
+  }
+  document.getElementById('f-image-url').value = itemImages[0] || '';
+  initUploadSlots();
   document.getElementById('f-start-bid').value=item.starting_bid||0;
   document.getElementById('f-increment').value=item.min_increment||5;
   document.getElementById('f-status').value=item.status||'open';
@@ -1311,12 +1444,14 @@ async function deleteItem(id) {
 }
 
 function clearItemForm() {
-  ['edit-item-id','f-title','f-description','f-image-url','f-image-url-manual'].forEach(id=>document.getElementById(id).value='');
+  ['edit-item-id','f-title','f-description','f-image-url'].forEach(id=>document.getElementById(id).value='');
+  itemImages=['','','',''];
+  initUploadSlots();
   document.getElementById('f-category').value='Fishing Gear';
   document.getElementById('f-start-bid').value='25';
   document.getElementById('f-increment').value='5';
   document.getElementById('f-status').value='open';
-  document.getElementById('img-preview').style.display='none';
+
   document.getElementById('upload-progress').style.display='none';
   document.getElementById('item-form-title').textContent='➕ Add New Auction Item';
   setDefaultEndDate();
