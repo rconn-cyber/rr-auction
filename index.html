@@ -9,25 +9,30 @@
 
   :root {
     --navy: #0d1f3c;
-    --navy-mid: #122444;
-    --navy-light: #1a3158;
+    --navy-mid: #1a3158;
     --gold: #c9a84c;
     --gold-light: #e2c06a;
-    --gold-dim: #7a6030;
-    --cream: #f5efe0;
-    --text: #e8dfc8;
-    --text-dim: #a09070;
-    --red: #8b1a1a;
-    --green: #1a5c30;
-    --card-bg: #0f2540;
-    --border: rgba(201,168,76,0.25);
+    --gold-dim: #8a6f30;
+    --cream: #fdf8f0;
+    --white: #ffffff;
+    --text: #1a2a3a;
+    --text-mid: #3a4a5a;
+    --text-dim: #6a7a8a;
+    --border: #d4c5a0;
+    --border-light: #ede5d0;
+    --card-bg: #ffffff;
+    --page-bg: #f5efe0;
+    --input-bg: #ffffff;
+    --red: #c0392b;
+    --green: #1a6b3a;
+    --header-text: #ffffff;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Source Sans 3', sans-serif;
-    background: var(--navy);
+    background: var(--page-bg);
     color: var(--text);
     min-height: 100vh;
     font-size: 16px;
@@ -37,7 +42,7 @@
   /* ── HEADER ── */
   header {
     background: linear-gradient(180deg, #060f1e 0%, var(--navy) 100%);
-    border-bottom: 2px solid var(--gold);
+    border-bottom: 3px solid var(--gold);
     padding: 20px 16px 16px;
     text-align: center;
     position: relative;
@@ -47,13 +52,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 40px,
-      rgba(201,168,76,0.03) 40px,
-      rgba(201,168,76,0.03) 80px
-    );
+    background: repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(201,168,76,0.04) 40px, rgba(201,168,76,0.04) 80px);
     pointer-events: none;
   }
   .header-badge {
@@ -79,57 +78,45 @@
   header p.subtitle {
     font-family: 'Lora', serif;
     font-style: italic;
-    color: var(--text-dim);
+    color: rgba(255,255,255,0.65);
     font-size: 15px;
     margin-top: 6px;
   }
-  .anchor-deco {
-    color: var(--gold-dim);
-    font-size: 22px;
-    margin: 0 10px;
-    vertical-align: middle;
-  }
+  .anchor-deco { color: var(--gold-dim); font-size: 22px; margin: 0 10px; vertical-align: middle; }
 
-  /* ── NAV TABS ── */
+  /* ── TAB BAR ── */
   .tab-bar {
     display: flex;
-    background: #060f1e;
-    border-bottom: 1px solid var(--border);
+    background: var(--navy);
+    border-bottom: 2px solid var(--gold);
     overflow-x: auto;
   }
   .tab-btn {
-    flex: 1;
-    min-width: 100px;
-    padding: 14px 10px;
-    background: none;
-    border: none;
-    color: var(--text-dim);
+    flex: 1; min-width: 100px;
+    padding: 13px 10px;
+    background: none; border: none;
+    color: rgba(255,255,255,0.55);
     font-family: 'Cinzel', serif;
-    font-size: 13px;
-    letter-spacing: 1px;
+    font-size: 13px; letter-spacing: 1px;
     cursor: pointer;
     border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
     transition: all .2s;
     white-space: nowrap;
   }
-  .tab-btn.active {
-    color: var(--gold);
-    border-bottom-color: var(--gold);
-  }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
   .tab-btn:hover { color: var(--gold-light); }
 
-  /* ── MAIN LAYOUT ── */
+  /* ── LAYOUT ── */
   main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
-
   .section { display: none; }
   .section.active { display: block; }
 
-  /* ── AUCTION COUNTDOWN ── */
+  /* ── AUCTION BANNER ── */
   .auction-banner {
-    background: linear-gradient(135deg, #060f1e, var(--navy-light));
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--gold);
-    border-radius: 4px;
+    background: var(--navy);
+    border: 1px solid var(--gold);
+    border-radius: 6px;
     padding: 16px 20px;
     margin-bottom: 28px;
     display: flex;
@@ -138,458 +125,213 @@
     justify-content: space-between;
     gap: 12px;
   }
-  .auction-banner h2 {
-    font-family: 'Cinzel', serif;
-    font-size: 14px;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .auction-banner p {
-    font-size: 14px;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-  .countdown-display {
-    display: flex;
-    gap: 10px;
-  }
+  .auction-banner h2 { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+  .auction-banner p { font-size: 14px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+  .countdown-display { display: flex; gap: 10px; }
   .countdown-unit {
     text-align: center;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
     border-radius: 4px;
     padding: 6px 10px;
     min-width: 52px;
   }
-  .countdown-unit .num {
-    display: block;
-    font-family: 'Cinzel', serif;
-    font-size: 20px;
-    color: var(--gold);
-    line-height: 1;
-  }
-  .countdown-unit .lbl {
-    display: block;
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-top: 3px;
-  }
+  .countdown-unit .num { display: block; font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold); line-height: 1; }
+  .countdown-unit .lbl { display: block; font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
 
   /* ── ITEM GRID ── */
-  .items-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-  }
+  .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
   .item-card {
     background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
     overflow: hidden;
     transition: transform .2s, box-shadow .2s;
     cursor: pointer;
     position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
-  .item-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    border-color: rgba(201,168,76,0.5);
-  }
-  .item-card.closed { opacity: .65; }
+  .item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(13,31,60,0.15); border-color: var(--gold); }
+  .item-card.closed { opacity: .7; }
 
-  .item-img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    display: block;
-    background: var(--navy-light);
-  }
+  .item-img { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--border-light); }
   .item-img-placeholder {
-    width: 100%;
-    height: 200px;
-    background: linear-gradient(135deg, var(--navy-light), #0a1a30);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    color: var(--gold-dim);
+    width: 100%; height: 200px;
+    background: linear-gradient(135deg, #e8dfc8, #d4c8a8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; color: var(--gold-dim);
   }
 
   .item-body { padding: 16px; }
-  .item-cat {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .item-title {
-    font-family: 'Cinzel', serif;
-    font-size: 17px;
-    color: var(--cream);
-    margin-bottom: 6px;
-    line-height: 1.3;
-  }
-  .item-desc {
-    font-size: 14px;
-    color: var(--text-dim);
-    margin-bottom: 14px;
-    line-height: 1.5;
-  }
+  .item-cat { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dim); font-weight: 600; margin-bottom: 4px; }
+  .item-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--navy); margin-bottom: 6px; line-height: 1.3; }
+  .item-desc { font-size: 14px; color: var(--text-dim); margin-bottom: 14px; line-height: 1.5; }
 
   .item-bid-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding-top: 12px; border-top: 1px solid var(--border-light);
   }
   .bid-label { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
-  .bid-amount {
-    font-family: 'Cinzel', serif;
-    font-size: 22px;
-    color: var(--gold);
-    line-height: 1;
-  }
+  .bid-amount { font-family: 'Cinzel', serif; font-size: 22px; color: var(--navy); line-height: 1; }
   .bid-count { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-
-  .item-timer {
-    font-size: 12px;
-    color: var(--text-dim);
-    text-align: right;
-  }
-  .item-timer.urgent { color: #e07050; }
+  .item-timer { font-size: 12px; color: var(--text-dim); text-align: right; }
+  .item-timer.urgent { color: #c0392b; }
 
   .status-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    padding: 4px 10px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border-radius: 2px;
+    position: absolute; top: 12px; right: 12px;
+    padding: 4px 10px; font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; border-radius: 2px;
   }
-  .status-badge.open { background: var(--green); color: #90ffb0; }
-  .status-badge.closed { background: var(--red); color: #ffb0b0; }
-  .status-badge.upcoming { background: var(--navy-light); color: var(--gold); border: 1px solid var(--gold-dim); }
+  .status-badge.open { background: #d4edda; color: #155724; }
+  .status-badge.closed { background: #f8d7da; color: #721c24; }
+  .status-badge.upcoming { background: #fff3cd; color: #856404; }
 
   /* ── MODAL ── */
   .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 1000;
-    overflow-y: auto;
-    padding: 20px 16px;
+    display: none; position: fixed; inset: 0;
+    background: rgba(13,31,60,0.75);
+    z-index: 1000; overflow-y: auto; padding: 20px 16px;
   }
   .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
   .modal {
-    background: var(--navy-mid);
+    background: var(--white);
     border: 1px solid var(--border);
-    border-top: 3px solid var(--gold);
-    border-radius: 6px;
-    width: 100%;
-    max-width: 640px;
-    position: relative;
-    padding: 28px 24px;
+    border-top: 4px solid var(--gold);
+    border-radius: 8px;
+    width: 100%; max-width: 640px;
+    position: relative; padding: 28px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   }
-  .modal-close {
-    position: absolute;
-    top: 14px;
-    right: 16px;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-size: 22px;
-    cursor: pointer;
-    line-height: 1;
-  }
-  .modal-close:hover { color: var(--gold); }
-  .modal h2 {
-    font-family: 'Cinzel', serif;
-    color: var(--gold);
-    font-size: 20px;
-    margin-bottom: 6px;
-    padding-right: 30px;
-    line-height: 1.3;
-  }
+  .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--text-dim); font-size: 22px; cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--navy); }
+  .modal h2 { font-family: 'Cinzel', serif; color: var(--navy); font-size: 20px; margin-bottom: 6px; padding-right: 30px; line-height: 1.3; }
   .modal-meta { font-size: 13px; color: var(--text-dim); margin-bottom: 16px; }
-  .modal-img {
-    width: 100%;
-    height: 260px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 16px;
-  }
-  .modal-desc { font-size: 15px; color: var(--text); line-height: 1.6; margin-bottom: 20px; }
+  .modal-img { width: 100%; height: 260px; object-fit: cover; border-radius: 4px; margin-bottom: 16px; border: 1px solid var(--border-light); }
+  .modal-desc { font-size: 15px; color: var(--text-mid); line-height: 1.6; margin-bottom: 20px; }
 
   .current-bid-box {
-    background: rgba(0,0,0,0.3);
+    background: var(--page-bg);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 16px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
+    border-radius: 6px;
+    padding: 16px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
   }
-  .current-bid-box .big {
-    font-family: 'Cinzel', serif;
-    font-size: 28px;
-    color: var(--gold);
-  }
+  .current-bid-box .big { font-family: 'Cinzel', serif; font-size: 28px; color: var(--navy); }
   .current-bid-box .small { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
   /* ── FORMS ── */
   .form-group { margin-bottom: 16px; }
-  .form-group label {
-    display: block;
-    font-size: 12px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
+  .form-group label { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 6px; font-weight: 600; }
   .form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    background: rgba(0,0,0,0.4);
+    width: 100%; background: var(--input-bg);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--cream);
+    border-radius: 4px; color: var(--text);
     font-family: 'Source Sans 3', sans-serif;
-    font-size: 16px;
-    padding: 10px 14px;
-    transition: border-color .2s;
-    outline: none;
+    font-size: 16px; padding: 10px 14px;
+    transition: border-color .2s; outline: none;
   }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: var(--gold);
-  }
-  .form-group input::placeholder { color: var(--text-dim); }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(13,31,60,0.1); }
   .form-group textarea { resize: vertical; min-height: 80px; }
-  .form-group select option { background: var(--navy-mid); }
+
+  /* Image upload area */
+  .img-upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--page-bg);
+    position: relative;
+  }
+  .img-upload-area:hover { border-color: var(--navy); background: #ede5d0; }
+  .img-upload-area.dragover { border-color: var(--gold); background: #fdf3d8; }
+  .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .img-upload-area .upload-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+  .img-upload-area p { font-size: 14px; color: var(--text-dim); }
+  .img-upload-area p strong { color: var(--navy); }
+  .img-preview { width: 100%; max-height: 160px; object-fit: cover; border-radius: 4px; margin-top: 10px; border: 1px solid var(--border); display: none; }
+  .img-upload-progress { margin-top: 8px; font-size: 13px; color: var(--gold-dim); display: none; }
 
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
   .btn {
-    display: inline-block;
-    padding: 13px 28px;
-    font-family: 'Cinzel', serif;
-    font-size: 14px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    border: none;
-    border-radius: 3px;
-    text-transform: uppercase;
-    transition: all .2s;
-    text-decoration: none;
-    text-align: center;
+    display: inline-block; padding: 13px 28px;
+    font-family: 'Cinzel', serif; font-size: 14px;
+    letter-spacing: 2px; cursor: pointer; border: none;
+    border-radius: 4px; text-transform: uppercase;
+    transition: all .2s; text-decoration: none; text-align: center;
   }
-  .btn-gold {
-    background: var(--gold);
-    color: var(--navy);
-    font-weight: 700;
-  }
+  .btn-gold { background: var(--gold); color: var(--navy); font-weight: 700; }
   .btn-gold:hover { background: var(--gold-light); }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--gold);
-    color: var(--gold);
-  }
-  .btn-outline:hover { background: rgba(201,168,76,0.1); }
-  .btn-danger {
-    background: var(--red);
-    color: #ffcccc;
-  }
-  .btn-danger:hover { background: #a02020; }
-  .btn-sm { padding: 8px 16px; font-size: 12px; }
+  .btn-navy { background: var(--navy); color: var(--gold); font-weight: 700; }
+  .btn-navy:hover { background: var(--navy-mid); }
+  .btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+  .btn-outline:hover { background: var(--navy); color: var(--white); }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-danger:hover { background: #a93226; }
+  .btn-sm { padding: 7px 14px; font-size: 11px; }
   .btn-full { width: 100%; display: block; }
 
   /* ── BID HISTORY ── */
   .bid-history { margin-top: 20px; }
-  .bid-history h3 {
-    font-family: 'Cinzel', serif;
-    font-size: 13px;
-    color: var(--gold-dim);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-  }
-  .bid-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(201,168,76,0.1);
-    font-size: 14px;
-  }
+  .bid-history h3 { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--border-light); padding-bottom: 8px; }
+  .bid-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-light); font-size: 14px; }
   .bid-row:last-child { border-bottom: none; }
-  .bid-row .bidder { color: var(--cream); font-weight: 500; }
-  .bid-row .bid-val { color: var(--gold); font-family: 'Cinzel', serif; }
+  .bid-row .bidder { color: var(--text); font-weight: 500; }
+  .bid-row .bid-val { color: var(--navy); font-family: 'Cinzel', serif; font-weight: 600; }
   .bid-row .bid-time { color: var(--text-dim); font-size: 12px; }
-  .bid-row.winning .bidder::after {
-    content: ' 🏆';
-    font-size: 12px;
-  }
+  .bid-row.winning .bidder::after { content: ' 🏆'; font-size: 12px; }
 
   /* ── ADMIN ── */
-  .admin-login {
-    max-width: 400px;
-    margin: 60px auto;
-    text-align: center;
-  }
-  .admin-login h2 {
-    font-family: 'Cinzel', serif;
-    color: var(--gold);
-    font-size: 22px;
-    margin-bottom: 6px;
-  }
+  .admin-login { max-width: 400px; margin: 60px auto; text-align: center; }
+  .admin-login h2 { font-family: 'Cinzel', serif; color: var(--navy); font-size: 22px; margin-bottom: 6px; }
   .admin-login p { color: var(--text-dim); font-size: 14px; margin-bottom: 28px; }
-
   .admin-panel { display: none; }
   .admin-panel.visible { display: block; }
 
   .admin-section {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 24px;
-    margin-bottom: 24px;
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 24px; margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
-  .admin-section h3 {
-    font-family: 'Cinzel', serif;
-    color: var(--gold);
-    font-size: 16px;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
+  .admin-section h3 { font-family: 'Cinzel', serif; color: var(--navy); font-size: 16px; letter-spacing: 1px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border-light); }
 
   .admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .admin-table th {
-    text-align: left;
-    padding: 10px 12px;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    border-bottom: 1px solid var(--border);
-  }
-  .admin-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(201,168,76,0.08);
-    color: var(--text);
-    vertical-align: middle;
-  }
+  .admin-table th { text-align: left; padding: 10px 12px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); background: var(--page-bg); border-bottom: 2px solid var(--border); }
+  .admin-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); color: var(--text); vertical-align: middle; }
   .admin-table tr:last-child td { border-bottom: none; }
-  .admin-table tr:hover td { background: rgba(201,168,76,0.04); }
-
-  .actions-cell { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-table tr:hover td { background: var(--page-bg); }
+  .actions-cell { display: flex; gap: 6px; flex-wrap: wrap; }
 
   /* ── TOAST ── */
   #toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
+    position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(80px);
-    background: var(--navy-light);
-    border: 1px solid var(--gold);
-    border-radius: 4px;
-    padding: 12px 24px;
-    color: var(--gold);
-    font-family: 'Cinzel', serif;
-    font-size: 14px;
-    letter-spacing: 1px;
-    z-index: 9999;
-    transition: transform .3s;
-    white-space: nowrap;
-    pointer-events: none;
+    background: var(--navy); border: 2px solid var(--gold);
+    border-radius: 4px; padding: 12px 24px;
+    color: var(--gold); font-family: 'Cinzel', serif;
+    font-size: 14px; letter-spacing: 1px;
+    z-index: 9999; transition: transform .3s;
+    white-space: nowrap; pointer-events: none;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* ── DIVIDER ── */
-  .gold-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 28px 0;
-    color: var(--gold-dim);
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .gold-divider::before, .gold-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  .gold-divider { display: flex; align-items: center; gap: 12px; margin: 28px 0; color: var(--gold-dim); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  .gold-divider::before, .gold-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  /* ── LOADING ── */
-  .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-    font-family: 'Lora', serif;
-    font-style: italic;
-    font-size: 16px;
-  }
-  .loading::before {
-    content: '⚓';
-    display: block;
-    font-size: 32px;
-    margin-bottom: 12px;
-    animation: spin 2s linear infinite;
-  }
+  .loading { text-align: center; padding: 60px 20px; color: var(--text-dim); font-family: 'Lora', serif; font-style: italic; font-size: 16px; }
+  .loading::before { content: '⚓'; display: block; font-size: 32px; margin-bottom: 12px; animation: spin 2s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
   .empty-state .icon { font-size: 48px; margin-bottom: 12px; display: block; }
   .empty-state p { font-family: 'Lora', serif; font-style: italic; }
 
-  /* ── SETUP HELPER ── */
-  .setup-box {
-    background: rgba(139,26,26,0.2);
-    border: 1px solid rgba(200,80,80,0.4);
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 24px;
-    font-size: 14px;
-    line-height: 1.7;
-  }
-  .setup-box h3 { color: #ff9090; font-size: 15px; margin-bottom: 8px; }
-  .setup-box code {
-    background: rgba(0,0,0,0.4);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: monospace;
-    color: var(--gold-light);
-    font-size: 13px;
-    display: block;
-    margin: 8px 0;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-
-  /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     .items-grid { grid-template-columns: 1fr; }
     .current-bid-box { flex-direction: column; }
@@ -599,70 +341,26 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="header-badge">31st Annual Fishing Tournament</div>
   <h1><span class="anchor-deco">⚓</span> Online Auction <span class="anchor-deco">⚓</span></h1>
   <p class="subtitle">Rough Riders Fishing Tournament &bull; Treasure Island, FL &bull; June 19–20, 2026</p>
 </header>
 
-<!-- TAB BAR -->
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="auction">🎣 Live Auction</button>
   <button class="tab-btn" data-tab="my-bids">📋 My Bids</button>
   <button class="tab-btn" data-tab="admin">⚙️ Admin</button>
 </div>
 
-<!-- MAIN -->
 <main>
-
-  <!-- SETUP WARNING (shown if Supabase not configured) -->
-  <div id="setup-warning" class="setup-box" style="display:none">
-    <h3>⚠️ Supabase Setup Required</h3>
-    Configure your Supabase credentials at the top of this file, then run the SQL below to create the required tables:
-    <code>-- auction_items table
-CREATE TABLE auction_items (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  title text NOT NULL,
-  description text,
-  category text DEFAULT 'General',
-  image_url text,
-  starting_bid numeric NOT NULL DEFAULT 0,
-  min_increment numeric NOT NULL DEFAULT 5,
-  current_bid numeric,
-  current_bidder text,
-  status text DEFAULT 'open',
-  ends_at timestamptz,
-  created_at timestamptz DEFAULT now()
-);
-
--- auction_bids table
-CREATE TABLE auction_bids (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  item_id uuid REFERENCES auction_items(id) ON DELETE CASCADE,
-  bidder_name text NOT NULL,
-  bidder_email text NOT NULL,
-  amount numeric NOT NULL,
-  created_at timestamptz DEFAULT now()
-);
-
--- Enable RLS + public policies
-ALTER TABLE auction_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE auction_bids ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "public read items" ON auction_items FOR SELECT TO anon USING (true);
-CREATE POLICY "public read bids" ON auction_bids FOR SELECT TO anon USING (true);
-CREATE POLICY "public insert bids" ON auction_bids FOR INSERT TO anon WITH CHECK (true);
-CREATE POLICY "service manage items" ON auction_items FOR ALL TO service_role USING (true);
-CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USING (true);</code>
-    Also add <strong>SUPABASE_URL</strong> and <strong>SUPABASE_ANON_KEY</strong> in the CONFIG section at the top of this file.
-  </div>
 
   <!-- AUCTION TAB -->
   <div id="tab-auction" class="section active">
     <div class="auction-banner">
       <div>
         <h2>⚡ Auction Closes In</h2>
-        <p id="auction-date-label">Loading auction end date…</p>
+        <p id="auction-date-label">Loading…</p>
       </div>
       <div class="countdown-display">
         <div class="countdown-unit"><span class="num" id="cd-d">--</span><span class="lbl">Days</span></div>
@@ -671,7 +369,6 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
         <div class="countdown-unit"><span class="num" id="cd-s">--</span><span class="lbl">Sec</span></div>
       </div>
     </div>
-
     <div id="items-loading" class="loading">Loading auction items…</div>
     <div id="items-grid" class="items-grid" style="display:none"></div>
     <div id="items-empty" class="empty-state" style="display:none">
@@ -687,25 +384,24 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
       <label>Look up by email</label>
       <input type="email" id="lookup-email" placeholder="your@email.com">
     </div>
-    <button class="btn btn-gold" onclick="lookupMyBids()">Find My Bids</button>
+    <button class="btn btn-navy" onclick="lookupMyBids()">Find My Bids</button>
     <div id="my-bids-results" style="margin-top:24px"></div>
   </div>
 
   <!-- ADMIN TAB -->
   <div id="tab-admin" class="section">
     <div id="admin-login-form" class="admin-login">
-      <h2>Admin Access</h2>
-      <p>Enter the judge/admin password to manage auction items.</p>
+      <h2>⚙️ Admin Access</h2>
+      <p>Enter the admin password to manage auction items.</p>
       <div class="form-group">
         <label>Password</label>
         <input type="password" id="admin-pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()">
       </div>
-      <button class="btn btn-gold btn-full" onclick="adminLogin()">Enter Admin</button>
-      <p id="admin-login-err" style="color:#ff9090;font-size:13px;margin-top:10px;display:none">Incorrect password.</p>
+      <button class="btn btn-navy btn-full" onclick="adminLogin()">Enter Admin</button>
+      <p id="admin-login-err" style="color:var(--red);font-size:13px;margin-top:10px;display:none">Incorrect password.</p>
     </div>
 
     <div id="admin-panel" class="admin-panel">
-      <!-- ADD ITEM FORM -->
       <div class="admin-section">
         <h3 id="item-form-title">➕ Add New Auction Item</h3>
         <input type="hidden" id="edit-item-id">
@@ -721,8 +417,8 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
               <option>Experiences</option>
               <option>Apparel</option>
               <option>Gift Cards</option>
-              <option>Art & Collectibles</option>
-              <option>Food & Beverage</option>
+              <option>Art &amp; Collectibles</option>
+              <option>Food &amp; Beverage</option>
               <option>General</option>
             </select>
           </div>
@@ -731,10 +427,25 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
           <label>Description</label>
           <textarea id="f-description" placeholder="Describe the item, value, donor, etc."></textarea>
         </div>
+
+        <!-- IMAGE UPLOAD -->
         <div class="form-group">
-          <label>Image URL (optional)</label>
-          <input type="url" id="f-image" placeholder="https://...">
+          <label>Item Photo</label>
+          <div class="img-upload-area" id="upload-area">
+            <input type="file" id="f-image-file" accept="image/*" onchange="handleImageSelect(event)">
+            <span class="upload-icon">📷</span>
+            <p><strong>Click to upload</strong> or drag &amp; drop</p>
+            <p>JPG, PNG, GIF up to 5MB</p>
+            <img id="img-preview" class="img-preview" alt="Preview">
+          </div>
+          <div id="upload-progress" class="img-upload-progress">⏳ Uploading image…</div>
+          <input type="hidden" id="f-image-url">
+          <div style="margin-top:8px">
+            <label style="margin-bottom:4px">Or paste an image URL</label>
+            <input type="url" id="f-image-url-manual" placeholder="https://..." oninput="syncImageUrl(this.value)">
+          </div>
         </div>
+
         <div class="form-row">
           <div class="form-group">
             <label>Starting Bid ($)</label>
@@ -765,30 +476,19 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
         </div>
       </div>
 
-      <!-- ITEMS TABLE -->
       <div class="admin-section">
         <h3>📦 All Auction Items</h3>
         <div id="admin-items-loading" class="loading" style="padding:30px">Loading…</div>
         <div id="admin-items-table" style="display:none;overflow-x:auto">
           <table class="admin-table">
             <thead>
-              <tr>
-                <th>Item</th>
-                <th>Category</th>
-                <th>Start</th>
-                <th>Current Bid</th>
-                <th>Bids</th>
-                <th>Status</th>
-                <th>Ends</th>
-                <th>Actions</th>
-              </tr>
+              <tr><th>Item</th><th>Category</th><th>Start</th><th>Current Bid</th><th>Bids</th><th>Status</th><th>Ends</th><th>Actions</th></tr>
             </thead>
             <tbody id="admin-items-body"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- BID LOG -->
       <div class="admin-section">
         <h3>📊 Recent Bids</h3>
         <div id="admin-bids-loading" class="loading" style="padding:30px">Loading…</div>
@@ -809,7 +509,7 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
 <div id="bid-modal" class="modal-overlay">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <p class="item-cat" id="modal-cat"></p>
+    <p class="item-cat" id="modal-cat" style="color:var(--gold-dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px"></p>
     <h2 id="modal-title"></h2>
     <p class="modal-meta" id="modal-meta"></p>
     <img id="modal-img" class="modal-img" src="" alt="" style="display:none">
@@ -843,11 +543,11 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
         <label>Your Bid ($)</label>
         <input type="number" id="bid-amount" min="0" step="1" placeholder="0">
       </div>
-      <button class="btn btn-gold btn-full" onclick="submitBid()">Place Bid — Bully!</button>
-      <p id="bid-error" style="color:#ff9090;font-size:13px;margin-top:10px;display:none"></p>
+      <button class="btn btn-navy btn-full" onclick="submitBid()">Place Bid — Bully!</button>
+      <p id="bid-error" style="color:var(--red);font-size:13px;margin-top:10px;display:none"></p>
     </div>
 
-    <div id="modal-closed-msg" style="display:none;text-align:center;padding:16px;color:#ff9090;font-family:'Cinzel',serif;font-size:15px">
+    <div id="modal-closed-msg" style="display:none;text-align:center;padding:16px;color:var(--red);font-family:'Cinzel',serif;font-size:15px">
       This auction item is closed. No further bids accepted.
     </div>
 
@@ -858,28 +558,19 @@ CREATE POLICY "service manage bids" ON auction_bids FOR ALL TO service_role USIN
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════
-   CONFIG — UPDATE THESE VALUES
-═══════════════════════════════════════════ */
+/* ═══════════════════════════ CONFIG ═══════════════════════════ */
 const SUPABASE_URL = 'https://qyoqyeaqacdjstvkonwx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5b3F5ZWFxYWNkanN0dmtvbnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NjUzMzMsImV4cCI6MjA4ODM0MTMzM30.Ln-i6P0qZlmGYoD-bC9xAlggyjt36bXXQfrqmHi-LLo';
 const ADMIN_PASSWORD = 'bullyjudge';
-
-/* Global auction end time — can also be driven per-item */
+const STORAGE_BUCKET = 'auction-images';
 const GLOBAL_AUCTION_END = new Date('2026-06-20T20:00:00-05:00');
 
-/* ═══════════════════════════════════════════
-   SUPABASE CLIENT
-═══════════════════════════════════════════ */
-const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
-
+/* ═══════════════════════════ SUPABASE ═══════════════════════════ */
 async function sb(path, options = {}) {
-  const url = `${SUPABASE_URL}/rest/v1/${path}`;
-  const res = await fetch(url, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: {
       'apikey': SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -890,36 +581,40 @@ async function sb(path, options = {}) {
     method: options.method || 'GET',
     body: options.body ? JSON.stringify(options.body) : undefined
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
+  if (!res.ok) throw new Error(await res.text());
+  const t = await res.text();
+  return t ? JSON.parse(t) : null;
 }
 
-/* ═══════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════ */
+async function sbStorage(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const fname = `item-${Date.now()}.${ext}`;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${fname}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': file.type,
+      'x-upsert': 'true'
+    },
+    body: file
+  });
+  if (!res.ok) throw new Error('Image upload failed: ' + await res.text());
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${fname}`;
+}
+
+/* ═══════════════════════════ STATE ═══════════════════════════ */
 let allItems = [];
 let currentItemId = null;
 let currentItemData = null;
 let adminLoggedIn = false;
-let countdownInterval = null;
-let refreshInterval = null;
 
-/* ═══════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════ */
+/* ═══════════════════════════ INIT ═══════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  if (!isConfigured) {
-    document.getElementById('setup-warning').style.display = 'block';
-  }
   initCountdown();
   loadItems();
   setDefaultEndDate();
 
-  // Tab navigation
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
@@ -930,45 +625,36 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tab === 'admin' && adminLoggedIn) loadAdminData();
     });
   });
+
+  // Drag & drop
+  const area = document.getElementById('upload-area');
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
+  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+  area.addEventListener('drop', e => {
+    e.preventDefault();
+    area.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) processImageFile(file);
+  });
 });
 
-/* ═══════════════════════════════════════════
-   COUNTDOWN
-═══════════════════════════════════════════ */
+/* ═══════════════════════════ COUNTDOWN ═══════════════════════════ */
 function initCountdown() {
   document.getElementById('auction-date-label').textContent =
-    'Closes ' + GLOBAL_AUCTION_END.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-
+    'Closes ' + GLOBAL_AUCTION_END.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short' });
   function tick() {
-    const now = new Date();
-    const diff = GLOBAL_AUCTION_END - now;
-    if (diff <= 0) {
-      ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent = '00');
-      clearInterval(countdownInterval);
-      return;
-    }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
-    document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
-    document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
-    document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+    const diff = GLOBAL_AUCTION_END - new Date();
+    if (diff <= 0) { ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent='00'); return; }
+    document.getElementById('cd-d').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
+    document.getElementById('cd-h').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    document.getElementById('cd-m').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    document.getElementById('cd-s').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
   }
-  tick();
-  countdownInterval = setInterval(tick, 1000);
+  tick(); setInterval(tick, 1000);
 }
 
-/* ═══════════════════════════════════════════
-   LOAD ITEMS
-═══════════════════════════════════════════ */
+/* ═══════════════════════════ ITEMS ═══════════════════════════ */
 async function loadItems() {
-  if (!isConfigured) {
-    document.getElementById('items-loading').style.display = 'none';
-    renderDemoItems();
-    return;
-  }
   try {
     allItems = await sb('auction_items?order=status.asc,created_at.asc&select=*');
     renderItems();
@@ -977,58 +663,40 @@ async function loadItems() {
   }
 }
 
-function renderDemoItems() {
-  // Demo items when Supabase not yet configured
-  allItems = [
-    { id:'demo-1', title:'Shimano Stradic 4000 Spinning Reel', category:'Fishing Gear', description:'Brand-new Shimano Stradic FL 4000 spinning reel. Smooth drag, 6+1 bearings. Perfect for inshore fishing.', image_url:'', starting_bid:120, min_increment:10, current_bid:120, current_bidder:null, status:'open', ends_at:GLOBAL_AUCTION_END.toISOString(), bid_count:0 },
-    { id:'demo-2', title:'Full-Day Charter for 4 — Treasure Island', category:'Experiences', description:'Donated by Capt. Mike Alvarez. Full-day offshore charter for up to 4 anglers. All tackle provided. Schedule at your convenience through September 2026.', image_url:'', starting_bid:400, min_increment:25, current_bid:475, current_bidder:'J. Hernandez', status:'open', ends_at:GLOBAL_AUCTION_END.toISOString(), bid_count:3 },
-    { id:'demo-3', title:'Rough Riders Bully! Collector Box', category:'Art & Collectibles', description:'Limited edition collector box: framed TR print, brass anchor paperweight, commemorative coin, and signed 2026 tournament poster.', image_url:'', starting_bid:75, min_increment:10, current_bid:75, current_bidder:null, status:'open', ends_at:GLOBAL_AUCTION_END.toISOString(), bid_count:0 },
-    { id:'demo-4', title:'$100 Bass Pro Shops Gift Card', category:'Gift Cards', description:'$100 gift card valid at any Bass Pro Shops or Cabela\'s location or online.', image_url:'', starting_bid:75, min_increment:5, current_bid:75, current_bidder:null, status:'upcoming', ends_at:GLOBAL_AUCTION_END.toISOString(), bid_count:0 },
-  ];
-  renderItems();
-}
-
 function renderItems() {
   document.getElementById('items-loading').style.display = 'none';
   const grid = document.getElementById('items-grid');
   const empty = document.getElementById('items-empty');
-  if (!allItems || allItems.length === 0) {
-    empty.style.display = 'block';
-    return;
-  }
+  if (!allItems || allItems.length === 0) { empty.style.display = 'block'; return; }
   grid.style.display = 'grid';
   grid.innerHTML = allItems.map(item => itemCardHTML(item)).join('');
 }
 
 function itemCardHTML(item) {
   const bid = item.current_bid || item.starting_bid || 0;
-  const bidder = item.current_bidder || null;
   const count = item.bid_count || 0;
+  const icon = categoryIcon(item.category);
   const imgHTML = item.image_url
     ? `<img class="item-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
   const placeholderStyle = item.image_url ? 'display:none' : '';
-  const icon = categoryIcon(item.category);
   const statusLabel = item.status === 'open' ? 'Open' : item.status === 'upcoming' ? 'Soon' : 'Closed';
-
   return `
-  <div class="item-card${item.status === 'closed' ? ' closed' : ''}" onclick="openItem('${item.id}')">
+  <div class="item-card${item.status==='closed'?' closed':''}" onclick="openItem('${item.id}')">
     <span class="status-badge ${item.status}">${statusLabel}</span>
     ${imgHTML}
     <div class="item-img-placeholder" style="${placeholderStyle}">${icon}</div>
     <div class="item-body">
-      <div class="item-cat">${esc(item.category || 'General')}</div>
+      <div class="item-cat">${esc(item.category||'General')}</div>
       <div class="item-title">${esc(item.title)}</div>
-      <div class="item-desc">${esc((item.description || '').substring(0,100))}${(item.description||'').length > 100 ? '…' : ''}</div>
+      <div class="item-desc">${esc((item.description||'').substring(0,100))}${(item.description||'').length>100?'…':''}</div>
       <div class="item-bid-row">
         <div>
-          <div class="bid-label">${bidder ? 'Current Bid' : 'Starting Bid'}</div>
+          <div class="bid-label">${item.current_bidder?'Current Bid':'Starting Bid'}</div>
           <div class="bid-amount">$${bid.toLocaleString()}</div>
-          <div class="bid-count">${count} bid${count !== 1 ? 's' : ''}</div>
+          <div class="bid-count">${count} bid${count!==1?'s':''}</div>
         </div>
-        <div class="item-timer${item.status === 'open' ? '' : ''}">
-          ${item.status === 'open' ? itemTimerHTML(item.ends_at) : item.status === 'upcoming' ? '🕐 Opening soon' : '🔒 Auction ended'}
-        </div>
+        <div class="item-timer">${item.status==='open'?itemTimerHTML(item.ends_at):item.status==='upcoming'?'🕐 Opening soon':'🔒 Ended'}</div>
       </div>
     </div>
   </div>`;
@@ -1037,23 +705,18 @@ function itemCardHTML(item) {
 function itemTimerHTML(endsAt) {
   if (!endsAt) return '';
   const diff = new Date(endsAt) - new Date();
-  if (diff <= 0) return '<span class="urgent">⏱ Ended</span>';
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  if (diff < 3600000) return `<span class="urgent">⏱ ${m}m left</span>`;
-  if (diff < 86400000) return `⏱ ${h}h ${m}m left`;
-  const d = Math.floor(diff / 86400000);
-  return `⏱ ${d}d ${h % 24}h left`;
+  if (diff<=0) return '<span class="urgent">⏱ Ended</span>';
+  if (diff<3600000) return `<span class="urgent">⏱ ${Math.floor(diff/60000)}m left</span>`;
+  if (diff<86400000) return `⏱ ${Math.floor(diff/3600000)}h left`;
+  return `⏱ ${Math.floor(diff/86400000)}d left`;
 }
 
 function categoryIcon(cat) {
-  const icons = { 'Fishing Gear': '🎣', 'Experiences': '⚓', 'Apparel': '👕', 'Gift Cards': '🎁', 'Art & Collectibles': '🏆', 'Food & Beverage': '🍺', 'General': '📦' };
+  const icons = {'Fishing Gear':'🎣','Experiences':'⚓','Apparel':'👕','Gift Cards':'🎁','Art & Collectibles':'🏆','Food & Beverage':'🍺','General':'📦'};
   return icons[cat] || '📦';
 }
 
-/* ═══════════════════════════════════════════
-   ITEM MODAL
-═══════════════════════════════════════════ */
+/* ═══════════════════════════ MODAL ═══════════════════════════ */
 async function openItem(id) {
   currentItemId = id;
   currentItemData = allItems.find(i => i.id === id);
@@ -1062,15 +725,10 @@ async function openItem(id) {
 
   document.getElementById('modal-cat').textContent = item.category || '';
   document.getElementById('modal-title').textContent = item.title;
-  document.getElementById('modal-meta').textContent =
-    `Starting bid: $${(item.starting_bid||0).toLocaleString()} · Min increment: $${(item.min_increment||5).toLocaleString()}`;
-
+  document.getElementById('modal-meta').textContent = `Starting bid: $${(item.starting_bid||0).toLocaleString()} · Min increment: $${(item.min_increment||5).toLocaleString()}`;
   const img = document.getElementById('modal-img');
-  if (item.image_url) { img.src = item.image_url; img.style.display = 'block'; }
-  else { img.style.display = 'none'; }
-
+  if (item.image_url) { img.src = item.image_url; img.style.display = 'block'; } else { img.style.display = 'none'; }
   document.getElementById('modal-desc').textContent = item.description || '';
-
   updateModalBidInfo(item);
 
   const isOpen = item.status === 'open';
@@ -1078,50 +736,37 @@ async function openItem(id) {
   document.getElementById('modal-closed-msg').style.display = isOpen ? 'none' : 'block';
   document.getElementById('bid-error').style.display = 'none';
 
-  // Set min bid amount
   const minBid = (item.current_bid || item.starting_bid || 0) + (item.min_increment || 5);
-  const bidInput = document.getElementById('bid-amount');
-  bidInput.min = minBid;
-  bidInput.value = minBid;
+  document.getElementById('bid-amount').min = minBid;
+  document.getElementById('bid-amount').value = minBid;
 
   document.getElementById('bid-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
-
   await loadBidHistory(id);
 }
 
 function updateModalBidInfo(item) {
   const current = item.current_bid || item.starting_bid || 0;
-  const minNext = current + (item.min_increment || 5);
   document.getElementById('modal-current-bid').textContent = '$' + current.toLocaleString();
   document.getElementById('modal-bid-leader').textContent = item.current_bidder ? `High bidder: ${item.current_bidder}` : 'No bids yet';
-  document.getElementById('modal-min-next').textContent = '$' + minNext.toLocaleString();
+  document.getElementById('modal-min-next').textContent = '$' + (current + (item.min_increment||5)).toLocaleString();
   const count = item.bid_count || 0;
-  document.getElementById('modal-bid-count').textContent = `${count} bid${count !== 1 ? 's' : ''} placed`;
+  document.getElementById('modal-bid-count').textContent = `${count} bid${count!==1?'s':''} placed`;
 }
 
 async function loadBidHistory(itemId) {
-  const container = document.getElementById('modal-bid-history');
-  container.innerHTML = '<div style="color:var(--text-dim);font-size:13px">Loading…</div>';
-  if (!isConfigured) {
-    container.innerHTML = '<div style="color:var(--text-dim);font-size:13px;font-style:italic">Bid history available after Supabase setup.</div>';
-    return;
-  }
+  const c = document.getElementById('modal-bid-history');
+  c.innerHTML = '<div style="color:var(--text-dim);font-size:13px">Loading…</div>';
   try {
     const bids = await sb(`auction_bids?item_id=eq.${itemId}&order=amount.desc&limit=20`);
-    if (!bids || bids.length === 0) {
-      container.innerHTML = '<div style="color:var(--text-dim);font-size:13px;font-style:italic">No bids yet — be the first!</div>';
-      return;
-    }
-    container.innerHTML = bids.map((b, i) => `
+    if (!bids || bids.length===0) { c.innerHTML='<div style="color:var(--text-dim);font-size:13px;font-style:italic">No bids yet — be the first!</div>'; return; }
+    c.innerHTML = bids.map((b,i) => `
       <div class="bid-row${i===0?' winning':''}">
         <span class="bidder">${esc(b.bidder_name)}</span>
         <span class="bid-val">$${b.amount.toLocaleString()}</span>
         <span class="bid-time">${timeAgo(b.created_at)}</span>
       </div>`).join('');
-  } catch(e) {
-    container.innerHTML = '<div style="color:#ff9090;font-size:13px">Error loading bids.</div>';
-  }
+  } catch(e) { c.innerHTML='<div style="color:var(--red);font-size:13px">Error loading bids.</div>'; }
 }
 
 function closeModal() {
@@ -1129,340 +774,275 @@ function closeModal() {
   document.body.style.overflow = '';
   currentItemId = null;
 }
-document.getElementById('bid-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
-});
+document.getElementById('bid-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
 
-/* ═══════════════════════════════════════════
-   SUBMIT BID
-═══════════════════════════════════════════ */
+/* ═══════════════════════════ BID ═══════════════════════════ */
 async function submitBid() {
   const name = document.getElementById('bid-name').value.trim();
   const email = document.getElementById('bid-email').value.trim();
   const amount = parseFloat(document.getElementById('bid-amount').value);
   const errEl = document.getElementById('bid-error');
 
-  if (!name || !email) return showBidError('Name and email are required.');
+  if (!name||!email) return showBidError('Name and email are required.');
   if (!email.includes('@')) return showBidError('Please enter a valid email address.');
-  if (!amount || isNaN(amount)) return showBidError('Please enter a valid bid amount.');
-
+  if (!amount||isNaN(amount)) return showBidError('Please enter a valid bid amount.');
   const item = currentItemData;
-  const minBid = (item.current_bid || item.starting_bid || 0) + (item.min_increment || 5);
-  if (amount < minBid) return showBidError(`Minimum bid is $${minBid.toLocaleString()}.`);
+  const minBid = (item.current_bid||item.starting_bid||0)+(item.min_increment||5);
+  if (amount<minBid) return showBidError(`Minimum bid is $${minBid.toLocaleString()}.`);
 
-  errEl.style.display = 'none';
-  const btn = document.querySelector('#modal-bid-form .btn-gold');
-  btn.textContent = 'Placing bid…';
-  btn.disabled = true;
-
-  if (!isConfigured) {
-    // Demo mode
-    setTimeout(() => {
-      btn.textContent = 'Place Bid — Bully!';
-      btn.disabled = false;
-      showToast('Demo mode: bid not saved. Configure Supabase to go live!');
-    }, 800);
-    return;
-  }
-
+  errEl.style.display='none';
+  const btn = document.querySelector('#modal-bid-form .btn-navy');
+  btn.textContent='Placing bid…'; btn.disabled=true;
   try {
-    // Insert bid
-    await sb('auction_bids', {
-      method: 'POST',
-      body: { item_id: currentItemId, bidder_name: name, bidder_email: email, amount },
-      prefer: 'return=minimal'
-    });
-
-    // Update item current_bid and bidder
-    await sb(`auction_items?id=eq.${currentItemId}`, {
-      method: 'PATCH',
-      headers: { 'Prefer': 'return=minimal' },
-      body: { current_bid: amount, current_bidder: name.split(' ')[0] + ' ' + (name.split(' ')[1]?.[0] || '') + '.' }
-    });
-
-    // Refresh item data
+    await sb('auction_bids', { method:'POST', body:{ item_id:currentItemId, bidder_name:name, bidder_email:email, amount }, prefer:'return=minimal' });
+    const shortName = name.split(' ')[0]+' '+(name.split(' ')[1]?.[0]||'')+'.';
+    await sb(`auction_items?id=eq.${currentItemId}`, { method:'PATCH', headers:{'Prefer':'return=minimal'}, body:{ current_bid:amount, current_bidder:shortName } });
     const updated = await sb(`auction_items?id=eq.${currentItemId}&select=*`);
-    if (updated && updated[0]) {
-      currentItemData = updated[0];
-      const idx = allItems.findIndex(i => i.id === currentItemId);
-      if (idx >= 0) allItems[idx] = updated[0];
+    if (updated&&updated[0]) {
+      currentItemData=updated[0];
+      const idx=allItems.findIndex(i=>i.id===currentItemId);
+      if(idx>=0) allItems[idx]=updated[0];
       updateModalBidInfo(updated[0]);
     }
-
     await loadBidHistory(currentItemId);
     renderItems();
     showToast('Bully! Your bid has been placed.');
-    document.getElementById('bid-name').value = '';
-    document.getElementById('bid-email').value = '';
-    const newMin = (currentItemData.current_bid || 0) + (currentItemData.min_increment || 5);
-    document.getElementById('bid-amount').value = newMin;
-    document.getElementById('bid-amount').min = newMin;
-  } catch(e) {
-    showBidError('Error placing bid: ' + e.message);
-  }
-  btn.textContent = 'Place Bid — Bully!';
-  btn.disabled = false;
+    document.getElementById('bid-name').value='';
+    document.getElementById('bid-email').value='';
+    const newMin=(currentItemData.current_bid||0)+(currentItemData.min_increment||5);
+    document.getElementById('bid-amount').value=newMin;
+    document.getElementById('bid-amount').min=newMin;
+  } catch(e) { showBidError('Error placing bid: '+e.message); }
+  btn.textContent='Place Bid — Bully!'; btn.disabled=false;
 }
 
 function showBidError(msg) {
-  const el = document.getElementById('bid-error');
-  el.textContent = msg;
-  el.style.display = 'block';
+  const el=document.getElementById('bid-error');
+  el.textContent=msg; el.style.display='block';
 }
 
-/* ═══════════════════════════════════════════
-   MY BIDS
-═══════════════════════════════════════════ */
+/* ═══════════════════════════ MY BIDS ═══════════════════════════ */
 async function lookupMyBids() {
-  const email = document.getElementById('lookup-email').value.trim();
-  const container = document.getElementById('my-bids-results');
-  if (!email || !email.includes('@')) {
-    container.innerHTML = '<p style="color:#ff9090">Please enter a valid email.</p>';
-    return;
-  }
-  if (!isConfigured) {
-    container.innerHTML = '<p style="color:var(--text-dim);font-style:italic">Available after Supabase setup.</p>';
-    return;
-  }
-  container.innerHTML = '<div class="loading" style="padding:30px">Searching…</div>';
+  const email=document.getElementById('lookup-email').value.trim();
+  const c=document.getElementById('my-bids-results');
+  if(!email||!email.includes('@')) { c.innerHTML='<p style="color:var(--red)">Please enter a valid email.</p>'; return; }
+  c.innerHTML='<div class="loading" style="padding:30px">Searching…</div>';
   try {
-    const bids = await sb(`auction_bids?bidder_email=eq.${encodeURIComponent(email)}&order=created_at.desc&select=*`);
-    if (!bids || bids.length === 0) {
-      container.innerHTML = '<p style="color:var(--text-dim)">No bids found for that email.</p>';
-      return;
+    const bids=await sb(`auction_bids?bidder_email=eq.${encodeURIComponent(email)}&order=created_at.desc&select=*`);
+    if(!bids||bids.length===0) { c.innerHTML='<p style="color:var(--text-dim)">No bids found for that email.</p>'; return; }
+    const itemIds=[...new Set(bids.map(b=>b.item_id))];
+    const itemsMap={};
+    for(const iid of itemIds) {
+      try { const it=await sb(`auction_items?id=eq.${iid}&select=id,title,current_bid,status`); if(it&&it[0]) itemsMap[iid]=it[0]; } catch{}
     }
-    // Enrich with item titles
-    const itemIds = [...new Set(bids.map(b => b.item_id))];
-    const itemsMap = {};
-    for (const iid of itemIds) {
-      try {
-        const it = await sb(`auction_items?id=eq.${iid}&select=id,title,current_bid,status`);
-        if (it && it[0]) itemsMap[iid] = it[0];
-      } catch {}
-    }
-    container.innerHTML = `
-      <div class="gold-divider">Bids for ${esc(email)}</div>
-      <div style="overflow-x:auto">
-      <table class="admin-table">
+    c.innerHTML=`<div class="gold-divider">Bids for ${esc(email)}</div>
+      <div style="overflow-x:auto"><table class="admin-table">
         <thead><tr><th>Item</th><th>Your Bid</th><th>Current High</th><th>Status</th><th>Time</th></tr></thead>
-        <tbody>
-          ${bids.map(b => {
-            const item = itemsMap[b.item_id] || {};
-            const isWinning = item.current_bid && b.amount >= item.current_bid;
-            return `<tr>
-              <td>${esc(item.title || 'Unknown Item')}</td>
-              <td style="color:var(--gold);font-family:'Cinzel',serif">$${b.amount.toLocaleString()}</td>
-              <td>$${(item.current_bid||0).toLocaleString()}</td>
-              <td>${item.status === 'open' ? (isWinning ? '<span style="color:#90ffb0">🏆 Winning</span>' : '<span style="color:#ff9090">Outbid</span>') : esc(item.status||'')}</td>
-              <td style="color:var(--text-dim);font-size:13px">${timeAgo(b.created_at)}</td>
-            </tr>`;
-          }).join('')}
-        </tbody>
+        <tbody>${bids.map(b=>{
+          const item=itemsMap[b.item_id]||{};
+          const winning=item.current_bid&&b.amount>=item.current_bid;
+          return `<tr>
+            <td>${esc(item.title||'Unknown')}</td>
+            <td style="color:var(--navy);font-family:'Cinzel',serif;font-weight:600">$${b.amount.toLocaleString()}</td>
+            <td>$${(item.current_bid||0).toLocaleString()}</td>
+            <td>${item.status==='open'?(winning?'<span style="color:var(--green);font-weight:600">🏆 Winning</span>':'<span style="color:var(--red)">Outbid</span>'):esc(item.status||'')}</td>
+            <td style="color:var(--text-dim);font-size:13px">${timeAgo(b.created_at)}</td>
+          </tr>`;
+        }).join('')}</tbody>
       </table></div>`;
+  } catch(e) { c.innerHTML=`<p style="color:var(--red)">Error: ${e.message}</p>`; }
+}
+
+/* ═══════════════════════════ IMAGE UPLOAD ═══════════════════════════ */
+function handleImageSelect(e) {
+  const file=e.target.files[0];
+  if(file) processImageFile(file);
+}
+
+function processImageFile(file) {
+  if(file.size>5*1024*1024) { showToast('Image must be under 5MB.'); return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const preview=document.getElementById('img-preview');
+    preview.src=e.target.result;
+    preview.style.display='block';
+  };
+  reader.readAsDataURL(file);
+  uploadImageFile(file);
+}
+
+async function uploadImageFile(file) {
+  const prog=document.getElementById('upload-progress');
+  prog.style.display='block';
+  prog.textContent='⏳ Uploading image…';
+  try {
+    const url=await sbStorage(file);
+    document.getElementById('f-image-url').value=url;
+    document.getElementById('f-image-url-manual').value=url;
+    prog.textContent='✅ Image uploaded!';
+    setTimeout(()=>prog.style.display='none',2000);
   } catch(e) {
-    container.innerHTML = `<p style="color:#ff9090">Error: ${e.message}</p>`;
+    prog.textContent='❌ Upload failed — try pasting a URL instead.';
+    prog.style.color='var(--red)';
   }
 }
 
-/* ═══════════════════════════════════════════
-   ADMIN
-═══════════════════════════════════════════ */
+function syncImageUrl(val) {
+  document.getElementById('f-image-url').value=val;
+  const preview=document.getElementById('img-preview');
+  if(val) { preview.src=val; preview.style.display='block'; }
+  else { preview.style.display='none'; }
+}
+
+/* ═══════════════════════════ ADMIN ═══════════════════════════ */
 function adminLogin() {
-  const pw = document.getElementById('admin-pw-input').value;
-  if (pw === ADMIN_PASSWORD) {
-    adminLoggedIn = true;
-    document.getElementById('admin-login-form').style.display = 'none';
+  if(document.getElementById('admin-pw-input').value===ADMIN_PASSWORD) {
+    adminLoggedIn=true;
+    document.getElementById('admin-login-form').style.display='none';
     document.getElementById('admin-panel').classList.add('visible');
     loadAdminData();
-  } else {
-    document.getElementById('admin-login-err').style.display = 'block';
-  }
+  } else { document.getElementById('admin-login-err').style.display='block'; }
 }
 
-async function loadAdminData() {
-  await loadAdminItems();
-  await loadAdminBids();
-}
+async function loadAdminData() { await loadAdminItems(); await loadAdminBids(); }
 
 async function loadAdminItems() {
-  const loading = document.getElementById('admin-items-loading');
-  const table = document.getElementById('admin-items-table');
-  loading.style.display = 'block';
-  table.style.display = 'none';
-  if (!isConfigured) {
-    loading.textContent = 'Configure Supabase to manage items.';
-    return;
-  }
+  const loading=document.getElementById('admin-items-loading');
+  const table=document.getElementById('admin-items-table');
+  loading.style.display='block'; table.style.display='none';
   try {
-    const items = await sb('auction_items?order=created_at.desc&select=*');
-    const body = document.getElementById('admin-items-body');
-    body.innerHTML = (items || []).map(item => {
-      const bid = item.current_bid || item.starting_bid || 0;
-      const ends = item.ends_at ? new Date(item.ends_at).toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '—';
+    const items=await sb('auction_items?order=created_at.desc&select=*');
+    allItems=items||[];
+    const body=document.getElementById('admin-items-body');
+    body.innerHTML=(items||[]).map(item=>{
+      const bid=item.current_bid||item.starting_bid||0;
+      const ends=item.ends_at?new Date(item.ends_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—';
       return `<tr>
         <td style="max-width:160px"><strong>${esc(item.title)}</strong></td>
         <td>${esc(item.category||'')}</td>
         <td>$${(item.starting_bid||0).toLocaleString()}</td>
-        <td style="color:var(--gold)">$${bid.toLocaleString()}</td>
+        <td style="color:var(--navy);font-family:'Cinzel',serif;font-weight:600">$${bid.toLocaleString()}</td>
         <td>${item.bid_count||0}</td>
         <td><span class="status-badge ${item.status}" style="position:static;display:inline-block">${item.status}</span></td>
         <td style="font-size:12px">${ends}</td>
         <td><div class="actions-cell">
           <button class="btn btn-outline btn-sm" onclick="editItem('${item.id}')">Edit</button>
-          <button class="btn btn-sm" style="background:var(--green);color:#90ffb0" onclick="toggleStatus('${item.id}','${item.status}')">
-            ${item.status === 'open' ? 'Close' : 'Open'}
+          <button class="btn btn-sm" style="background:${item.status==='open'?'#f8d7da;color:#721c24':'#d4edda;color:#155724'}" onclick="toggleStatus('${item.id}','${item.status}')">
+            ${item.status==='open'?'Close':'Open'}
           </button>
-          <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}')">Delete</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}')">Del</button>
         </div></td>
       </tr>`;
-    }).join('') || '<tr><td colspan="8" style="color:var(--text-dim);text-align:center">No items yet.</td></tr>';
-    loading.style.display = 'none';
-    table.style.display = 'block';
-  } catch(e) {
-    loading.textContent = 'Error: ' + e.message;
-  }
+    }).join('')||'<tr><td colspan="8" style="color:var(--text-dim);text-align:center">No items yet.</td></tr>';
+    loading.style.display='none'; table.style.display='block';
+  } catch(e) { loading.textContent='Error: '+e.message; }
 }
 
 async function loadAdminBids() {
-  const loading = document.getElementById('admin-bids-loading');
-  const table = document.getElementById('admin-bids-table');
-  loading.style.display = 'block';
-  table.style.display = 'none';
-  if (!isConfigured) { loading.textContent = 'Configure Supabase first.'; return; }
+  const loading=document.getElementById('admin-bids-loading');
+  const table=document.getElementById('admin-bids-table');
+  loading.style.display='block'; table.style.display='none';
   try {
-    const bids = await sb('auction_bids?order=created_at.desc&limit=50&select=*,auction_items(title)');
-    const body = document.getElementById('admin-bids-body');
-    body.innerHTML = (bids || []).map(b => `<tr>
-      <td>${esc(b.auction_items?.title || b.item_id)}</td>
+    const bids=await sb('auction_bids?order=created_at.desc&limit=50&select=*,auction_items(title)');
+    const body=document.getElementById('admin-bids-body');
+    body.innerHTML=(bids||[]).map(b=>`<tr>
+      <td>${esc(b.auction_items?.title||b.item_id)}</td>
       <td>${esc(b.bidder_name)}</td>
       <td style="color:var(--text-dim)">${esc(b.bidder_email)}</td>
-      <td style="color:var(--gold);font-family:'Cinzel',serif">$${b.amount.toLocaleString()}</td>
+      <td style="color:var(--navy);font-family:'Cinzel',serif;font-weight:600">$${b.amount.toLocaleString()}</td>
       <td style="color:var(--text-dim);font-size:12px">${timeAgo(b.created_at)}</td>
-    </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-dim);text-align:center">No bids yet.</td></tr>';
-    loading.style.display = 'none';
-    table.style.display = 'block';
-  } catch(e) {
-    loading.textContent = 'Error: ' + e.message;
-  }
+    </tr>`).join('')||'<tr><td colspan="5" style="color:var(--text-dim);text-align:center">No bids yet.</td></tr>';
+    loading.style.display='none'; table.style.display='block';
+  } catch(e) { loading.textContent='Error: '+e.message; }
 }
 
 async function saveItem() {
-  const id = document.getElementById('edit-item-id').value;
-  const payload = {
-    title: document.getElementById('f-title').value.trim(),
-    description: document.getElementById('f-description').value.trim(),
-    category: document.getElementById('f-category').value,
-    image_url: document.getElementById('f-image').value.trim() || null,
-    starting_bid: parseFloat(document.getElementById('f-start-bid').value) || 0,
-    min_increment: parseFloat(document.getElementById('f-increment').value) || 5,
-    status: document.getElementById('f-status').value,
-    ends_at: document.getElementById('f-ends-at').value ? new Date(document.getElementById('f-ends-at').value).toISOString() : null
+  const id=document.getElementById('edit-item-id').value;
+  const imageUrl=document.getElementById('f-image-url').value||document.getElementById('f-image-url-manual').value||null;
+  const payload={
+    title:document.getElementById('f-title').value.trim(),
+    description:document.getElementById('f-description').value.trim(),
+    category:document.getElementById('f-category').value,
+    image_url:imageUrl||null,
+    starting_bid:parseFloat(document.getElementById('f-start-bid').value)||0,
+    min_increment:parseFloat(document.getElementById('f-increment').value)||5,
+    status:document.getElementById('f-status').value,
+    ends_at:document.getElementById('f-ends-at').value?new Date(document.getElementById('f-ends-at').value).toISOString():null
   };
-  if (!payload.title) return showToast('Title is required.');
-  if (!isConfigured) { showToast('Configure Supabase first.'); return; }
+  if(!payload.title) { showToast('Title is required.'); return; }
   try {
-    if (id) {
-      await sb(`auction_items?id=eq.${id}`, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: payload });
+    if(id) {
+      await sb(`auction_items?id=eq.${id}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:payload});
       showToast('Item updated.');
     } else {
-      await sb('auction_items', { method: 'POST', body: payload });
+      await sb('auction_items',{method:'POST',body:payload});
       showToast('Item added!');
     }
     clearItemForm();
     await loadItems();
     await loadAdminItems();
-  } catch(e) {
-    showToast('Error: ' + e.message);
-  }
+  } catch(e) { showToast('Error: '+e.message); }
 }
 
 function editItem(id) {
-  const item = allItems.find(i => i.id === id);
-  if (!item) return;
-  document.getElementById('edit-item-id').value = id;
-  document.getElementById('f-title').value = item.title || '';
-  document.getElementById('f-description').value = item.description || '';
-  document.getElementById('f-category').value = item.category || 'General';
-  document.getElementById('f-image').value = item.image_url || '';
-  document.getElementById('f-start-bid').value = item.starting_bid || 0;
-  document.getElementById('f-increment').value = item.min_increment || 5;
-  document.getElementById('f-status').value = item.status || 'open';
-  if (item.ends_at) {
-    const d = new Date(item.ends_at);
-    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-    document.getElementById('f-ends-at').value = local;
-  }
-  document.getElementById('item-form-title').textContent = '✏️ Edit Item';
-  document.querySelector('.admin-section').scrollIntoView({ behavior: 'smooth' });
+  const item=allItems.find(i=>i.id===id);
+  if(!item) return;
+  document.getElementById('edit-item-id').value=id;
+  document.getElementById('f-title').value=item.title||'';
+  document.getElementById('f-description').value=item.description||'';
+  document.getElementById('f-category').value=item.category||'General';
+  document.getElementById('f-image-url').value=item.image_url||'';
+  document.getElementById('f-image-url-manual').value=item.image_url||'';
+  const preview=document.getElementById('img-preview');
+  if(item.image_url){preview.src=item.image_url;preview.style.display='block';}else{preview.style.display='none';}
+  document.getElementById('f-start-bid').value=item.starting_bid||0;
+  document.getElementById('f-increment').value=item.min_increment||5;
+  document.getElementById('f-status').value=item.status||'open';
+  if(item.ends_at){const d=new Date(item.ends_at);document.getElementById('f-ends-at').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
+  document.getElementById('item-form-title').textContent='✏️ Edit Item';
+  document.querySelector('.admin-section').scrollIntoView({behavior:'smooth'});
 }
 
-async function toggleStatus(id, current) {
-  const newStatus = current === 'open' ? 'closed' : 'open';
-  if (!isConfigured) return showToast('Configure Supabase first.');
+async function toggleStatus(id,current) {
+  const newStatus=current==='open'?'closed':'open';
   try {
-    await sb(`auction_items?id=eq.${id}`, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: { status: newStatus } });
+    await sb(`auction_items?id=eq.${id}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:{status:newStatus}});
     showToast(`Item ${newStatus}.`);
-    await loadItems();
-    await loadAdminItems();
-  } catch(e) { showToast('Error: ' + e.message); }
+    await loadItems(); await loadAdminItems();
+  } catch(e){showToast('Error: '+e.message);}
 }
 
 async function deleteItem(id) {
-  if (!confirm('Delete this item and all its bids? This cannot be undone.')) return;
-  if (!isConfigured) return showToast('Configure Supabase first.');
+  if(!confirm('Delete this item and all its bids?')) return;
   try {
-    await sb(`auction_bids?item_id=eq.${id}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
-    await sb(`auction_items?id=eq.${id}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+    await sb(`auction_bids?item_id=eq.${id}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+    await sb(`auction_items?id=eq.${id}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
     showToast('Item deleted.');
-    await loadItems();
-    await loadAdminItems();
-  } catch(e) { showToast('Error: ' + e.message); }
+    await loadItems(); await loadAdminItems();
+  } catch(e){showToast('Error: '+e.message);}
 }
 
 function clearItemForm() {
-  document.getElementById('edit-item-id').value = '';
-  document.getElementById('f-title').value = '';
-  document.getElementById('f-description').value = '';
-  document.getElementById('f-category').value = 'Fishing Gear';
-  document.getElementById('f-image').value = '';
-  document.getElementById('f-start-bid').value = '25';
-  document.getElementById('f-increment').value = '5';
-  document.getElementById('f-status').value = 'open';
-  document.getElementById('f-ends-at').value = '';
-  document.getElementById('item-form-title').textContent = '➕ Add New Auction Item';
+  ['edit-item-id','f-title','f-description','f-image-url','f-image-url-manual'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-category').value='Fishing Gear';
+  document.getElementById('f-start-bid').value='25';
+  document.getElementById('f-increment').value='5';
+  document.getElementById('f-status').value='open';
+  document.getElementById('img-preview').style.display='none';
+  document.getElementById('upload-progress').style.display='none';
+  document.getElementById('item-form-title').textContent='➕ Add New Auction Item';
+  setDefaultEndDate();
 }
 
 function setDefaultEndDate() {
-  const d = new Date(GLOBAL_AUCTION_END);
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-  document.getElementById('f-ends-at').value = local;
+  const d=new Date(GLOBAL_AUCTION_END);
+  document.getElementById('f-ends-at').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
 }
 
-/* ═══════════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════════ */
-function esc(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function timeAgo(ts) {
-  if (!ts) return '';
-  const diff = Date.now() - new Date(ts).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return m + 'm ago';
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + 'h ago';
-  return Math.floor(h / 24) + 'd ago';
-}
-
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
+/* ═══════════════════════════ HELPERS ═══════════════════════════ */
+function esc(str){if(!str)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function timeAgo(ts){if(!ts)return'';const diff=Date.now()-new Date(ts).getTime();const m=Math.floor(diff/60000);if(m<1)return'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 </script>
 </body>
 </html>
