@@ -944,6 +944,7 @@ async function openItem(id) {
   const minBid = (item.current_bid || item.starting_bid || 0) + (item.min_increment || 5);
   document.getElementById('bid-amount').min = minBid;
   document.getElementById('bid-amount').value = minBid;
+  document.getElementById('bid-amount').placeholder = '$' + minBid.toLocaleString();
 
   document.getElementById('bid-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1075,8 +1076,8 @@ async function submitBid() {
         bidder_email: currentBidder.email,
         bidder_phone: currentBidder.phone,
         amount,
-        notify_outbid: currentBidder.notifyOutbid,
-        notify_win: currentBidder.notifyWin,
+        notify_outbid: currentBidder.notifyOutbid !== false,
+        notify_win: currentBidder.notifyWin !== false,
         contact_method: currentBidder.contactMethod || 'email'
       },
       prefer:'return=minimal'
@@ -1089,7 +1090,7 @@ async function submitBid() {
       currentItemData=updated0;
       const idx=allItems.findIndex(i=>i.id===currentItemId);
       if(idx>=0) allItems[idx]=updated0;
-      updateModalBidInfo(updated[0]);
+      updateModalBidInfo(updated0);
     }
     await loadBidHistory(currentItemId);
     renderItems();
@@ -1097,6 +1098,7 @@ async function submitBid() {
     const newMin=(currentItemData.current_bid||0)+(currentItemData.min_increment||5);
     document.getElementById('bid-amount').value=newMin;
     document.getElementById('bid-amount').min=newMin;
+    document.getElementById('bid-amount').placeholder='$'+newMin.toLocaleString();
   } catch(e) { showBidError('Error placing bid: '+e.message); }
   btn.textContent='Place Bid — Bully!'; btn.disabled=false;
 }
