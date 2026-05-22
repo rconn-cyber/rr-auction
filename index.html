@@ -665,6 +665,78 @@
         <p id="an-save-msg" style="font-size:13px;margin-top:10px;color:var(--green);display:none">&#x2714; Saved successfully.</p>
       </div>
 
+      <!-- USER MANAGEMENT -->
+      <div class="admin-section">
+        <h3>&#x1F465; Bidder Management</h3>
+        <p style="font-size:14px;color:var(--text-dim);margin-bottom:18px;line-height:1.6">
+          All registered bidders. Manage SMS opt-in consent, view bid history, and export contact list.
+        </p>
+
+        <!-- Search + Export bar -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+          <input type="text" id="um-search" placeholder="Search name, email or phone…"
+            style="flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--border);border-radius:4px;font-size:15px;background:white;color:var(--text)"
+            oninput="filterBidders()">
+          <button class="btn btn-outline btn-sm" onclick="exportBidders()">&#x1F4E5; Export CSV</button>
+          <button class="btn btn-outline btn-sm" onclick="loadBidderList()">&#x21BA; Refresh</button>
+        </div>
+
+        <!-- Stats row -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px">
+          <div style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:12px 18px;text-align:center;min-width:100px">
+            <div id="um-stat-total" style="font-family:'Cinzel',serif;font-size:24px;color:var(--navy)">—</div>
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Total Bidders</div>
+          </div>
+          <div style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:12px 18px;text-align:center;min-width:100px">
+            <div id="um-stat-sms" style="font-family:'Cinzel',serif;font-size:24px;color:var(--green)">—</div>
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">SMS Opt-In</div>
+          </div>
+          <div style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:12px 18px;text-align:center;min-width:100px">
+            <div id="um-stat-email" style="font-family:'Cinzel',serif;font-size:24px;color:#1a4a8a">—</div>
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Email Opt-In</div>
+          </div>
+          <div style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:12px 18px;text-align:center;min-width:100px">
+            <div id="um-stat-bids" style="font-family:'Cinzel',serif;font-size:24px;color:var(--gold-dim)">—</div>
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Total Bids</div>
+          </div>
+        </div>
+
+        <!-- Bidder table -->
+        <div id="um-loading" class="loading" style="padding:30px">Loading bidders…</div>
+        <div id="um-table-wrap" style="display:none;overflow-x:auto">
+          <table class="admin-table" id="um-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Contact Pref</th>
+                <th style="text-align:center">SMS Opt-In</th>
+                <th style="text-align:center">Outbid</th>
+                <th style="text-align:center">Win</th>
+                <th style="text-align:center">Bids</th>
+                <th>Last Bid</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="um-tbody"></tbody>
+          </table>
+        </div>
+        <p id="um-empty" style="display:none;color:var(--text-dim);font-style:italic;font-size:14px">No bidders yet.</p>
+
+        <!-- SMS Opt-In Consent Notice -->
+        <div style="background:#fffbf0;border:1px solid #e8d88a;border-radius:6px;padding:16px 18px;margin-top:20px">
+          <p style="font-size:13px;font-weight:600;color:#856404;margin-bottom:6px">&#x1F4CB; SMS Opt-In Compliance Notice</p>
+          <p style="font-size:13px;color:var(--text-mid);line-height:1.6">
+            Bidders who select <strong>"Text"</strong> or <strong>"Both"</strong> as their contact method are providing
+            express written consent to receive SMS notifications from the Rough Riders Fishing Tournament regarding
+            their bids. Message &amp; data rates may apply. Bidders can opt out by contacting
+            <a href="mailto:fishing@tamparoughriders.org" style="color:var(--gold-dim)">fishing@tamparoughriders.org</a>.
+            Consent records are stored per bid timestamp in Supabase.
+          </p>
+        </div>
+      </div>
+
     </div>
   </div>
 </main>
@@ -738,11 +810,16 @@
           </label>
         </div>
         <div style="background:#fffbf0;border:1px solid #e8d88a;border-radius:6px;padding:14px 16px;margin-bottom:16px">
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;color:var(--text-mid)">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;color:var(--text-mid);margin-bottom:10px">
             <input type="checkbox" id="bid-remember" checked style="width:18px;height:18px;accent-color:var(--navy);margin-top:2px;flex-shrink:0">
             <span><strong style="color:var(--navy)">Remember me on this device</strong><br>
             Save my info so I do not have to re-enter it for future bids.</span>
           </label>
+          <div id="sms-consent-notice" style="display:none;font-size:12px;color:var(--text-dim);border-top:1px solid #e8d88a;padding-top:10px;line-height:1.6">
+            &#x1F4F1; <strong style="color:#856404">SMS Consent:</strong> By selecting Text or Both above, you agree to receive
+            SMS bid notifications from the Rough Riders Fishing Tournament. Msg &amp; data rates may apply.
+            Reply STOP to opt out.
+          </div>
         </div>
         <button class="btn btn-navy btn-full" onclick="proceedToBidAmount()" style="margin-bottom:8px">Continue to Bid &#x2192;</button>
         <p id="bid-info-error" style="color:var(--red);font-size:13px;margin-top:6px;display:none"></p>
@@ -1365,7 +1442,7 @@ function adminLogin() {
   } else { document.getElementById('admin-login-err').style.display='block'; }
 }
 
-async function loadAdminData() { await loadAdminItems(); await loadAdminBids(); await loadAdminRecipients(); }
+async function loadAdminData() { await loadAdminItems(); await loadAdminBids(); await loadAdminRecipients(); await loadBidderList(); }
 
 async function loadAdminItems() {
   const loading=document.getElementById('admin-items-loading');
@@ -1534,6 +1611,183 @@ function setContactMethod(method) {
   });
   const hid = document.getElementById('bid-contact-method');
   if (hid) hid.value = method;
+  // Show SMS consent notice when text is selected
+  const notice = document.getElementById('sms-consent-notice');
+  if (notice) notice.style.display = (method === 'text' || method === 'both') ? 'block' : 'none';
+}
+
+
+/* ═══════════════════════════ USER / BIDDER MANAGEMENT ═══════════════════════════ */
+let allBidders = []; // deduped list built from auction_bids
+let filteredBidders = [];
+
+async function loadBidderList() {
+  const loading = document.getElementById('um-loading');
+  const wrap    = document.getElementById('um-table-wrap');
+  const empty   = document.getElementById('um-empty');
+  if (!loading) return;
+  loading.style.display = 'block';
+  wrap.style.display = 'none';
+  empty.style.display = 'none';
+
+  try {
+    // Pull all bids with item title
+    const bids = await sb('auction_bids?order=created_at.desc&select=*,auction_items(title)');
+    if (!bids || bids.length === 0) {
+      loading.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    // Dedupe by email — keep latest prefs, aggregate bid count
+    const byEmail = {};
+    for (const b of bids) {
+      const key = (b.bidder_email || '').toLowerCase();
+      if (!byEmail[key]) {
+        byEmail[key] = {
+          name: b.bidder_name,
+          email: b.bidder_email,
+          phone: b.bidder_phone || '',
+          contact_method: b.contact_method || 'email',
+          notify_outbid: b.notify_outbid,
+          notify_win: b.notify_win,
+          sms_optin: (b.contact_method === 'text' || b.contact_method === 'both'),
+          bid_count: 0,
+          last_bid_at: b.created_at,
+          last_bid_amount: b.amount,
+          last_item: b.auction_items?.title || ''
+        };
+      }
+      byEmail[key].bid_count++;
+      // Keep most recent prefs
+      if (b.created_at > byEmail[key].last_bid_at) {
+        byEmail[key].last_bid_at = b.created_at;
+        byEmail[key].last_bid_amount = b.amount;
+        byEmail[key].last_item = b.auction_items?.title || '';
+        byEmail[key].contact_method = b.contact_method || 'email';
+        byEmail[key].notify_outbid = b.notify_outbid;
+        byEmail[key].notify_win = b.notify_win;
+        byEmail[key].sms_optin = (b.contact_method === 'text' || b.contact_method === 'both');
+        if (b.bidder_phone) byEmail[key].phone = b.bidder_phone;
+      }
+    }
+
+    allBidders = Object.values(byEmail);
+    filteredBidders = [...allBidders];
+
+    // Stats
+    document.getElementById('um-stat-total').textContent = allBidders.length;
+    document.getElementById('um-stat-sms').textContent = allBidders.filter(b => b.sms_optin).length;
+    document.getElementById('um-stat-email').textContent = allBidders.filter(b => b.contact_method === 'email' || b.contact_method === 'both').length;
+    document.getElementById('um-stat-bids').textContent = bids.length;
+
+    renderBidderTable();
+    loading.style.display = 'none';
+    wrap.style.display = 'block';
+  } catch(e) {
+    loading.textContent = 'Error loading bidders: ' + e.message;
+  }
+}
+
+function renderBidderTable() {
+  const tbody = document.getElementById('um-tbody');
+  if (!filteredBidders.length) {
+    document.getElementById('um-table-wrap').style.display = 'none';
+    document.getElementById('um-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('um-table-wrap').style.display = 'block';
+  document.getElementById('um-empty').style.display = 'none';
+
+  tbody.innerHTML = filteredBidders.map(b => {
+    const smsOptIn = b.contact_method === 'text' || b.contact_method === 'both';
+    const emailOptIn = b.contact_method === 'email' || b.contact_method === 'both';
+    const methodBadge = b.contact_method === 'both'
+      ? '<span style="font-size:11px;background:#e8f4fd;color:#1a4a8a;padding:2px 8px;border-radius:10px">Both</span>'
+      : b.contact_method === 'text'
+      ? '<span style="font-size:11px;background:#e8f8ee;color:#1a6b3a;padding:2px 8px;border-radius:10px">&#x1F4F1; Text</span>'
+      : '<span style="font-size:11px;background:#e8f0fd;color:#1a4a8a;padding:2px 8px;border-radius:10px">&#x1F4E7; Email</span>';
+
+    return `<tr>
+      <td><strong style="color:var(--navy)">${esc(b.name)}</strong></td>
+      <td style="font-size:13px;color:var(--text-mid)">${esc(b.email)}</td>
+      <td style="font-size:13px;color:var(--text-mid)">${esc(b.phone) || '<span style="color:var(--text-dim)">—</span>'}</td>
+      <td>${methodBadge}</td>
+      <td style="text-align:center">
+        <span style="font-size:16px" title="${smsOptIn ? 'SMS Opt-In: YES — consent given at bid time' : 'SMS Opt-In: No'}">${smsOptIn ? '✅' : '—'}</span>
+      </td>
+      <td style="text-align:center">${b.notify_outbid ? '✅' : '—'}</td>
+      <td style="text-align:center">${b.notify_win ? '✅' : '—'}</td>
+      <td style="text-align:center;font-family:'Cinzel',serif;color:var(--navy)">${b.bid_count}</td>
+      <td style="font-size:12px;color:var(--text-dim)">${timeAgo(b.last_bid_at)}<br><span style="color:var(--navy);font-size:11px">$${b.last_bid_amount?.toLocaleString()}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="viewBidderHistory('${esc(b.email)}','${esc(b.name)}')">History</button>
+          <button class="btn btn-sm" style="background:#f8d7da;color:#721c24" onclick="optOutBidder('${esc(b.email)}','${esc(b.name)}')">Opt-Out</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterBidders() {
+  const q = document.getElementById('um-search').value.toLowerCase().trim();
+  if (!q) {
+    filteredBidders = [...allBidders];
+  } else {
+    filteredBidders = allBidders.filter(b =>
+      b.name?.toLowerCase().includes(q) ||
+      b.email?.toLowerCase().includes(q) ||
+      b.phone?.includes(q)
+    );
+  }
+  renderBidderTable();
+}
+
+async function viewBidderHistory(email, name) {
+  // Switch to My Bids tab and pre-fill email
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelector('[data-tab="my-bids"]').classList.add('active');
+  document.getElementById('tab-my-bids').classList.add('active');
+  document.getElementById('lookup-email').value = email;
+  await lookupMyBids();
+}
+
+async function optOutBidder(email, name) {
+  if (!confirm(`Remove SMS opt-in for ${name} (${email})? This will update their contact method to email-only on all future bids.`)) return;
+  try {
+    await sb(`auction_bids?bidder_email=eq.${encodeURIComponent(email)}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: { contact_method: 'email' }
+    });
+    showToast(`${name} opted out of SMS.`);
+    await loadBidderList();
+  } catch(e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+function exportBidders() {
+  if (!allBidders.length) { showToast('No bidders to export.'); return; }
+  const headers = ['Name','Email','Phone','Contact Method','SMS Opt-In','Outbid Alerts','Win Alerts','Bid Count','Last Bid'];
+  const rows = allBidders.map(b => [
+    b.name, b.email, b.phone || '',
+    b.contact_method,
+    (b.contact_method === 'text' || b.contact_method === 'both') ? 'Yes' : 'No',
+    b.notify_outbid ? 'Yes' : 'No',
+    b.notify_win ? 'Yes' : 'No',
+    b.bid_count,
+    new Date(b.last_bid_at).toLocaleDateString()
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `rr-auction-bidders-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('CSV downloaded.');
 }
 
 /* ═══════════════════════════ HELPERS ═══════════════════════════ */
