@@ -800,8 +800,20 @@
 
 <script>
 /* ═══════════════════════════ CONFIG ═══════════════════════════ */
-const SUPABASE_URL = 'https://qyoqyeaqacdjstvkonwx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5b3F5ZWFxYWNkanN0dmtvbnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NjUzMzMsImV4cCI6MjA4ODM0MTMzM30.Ln-i6P0qZlmGYoD-bC9xAlggyjt36bXXQfrqmHi-LLo';
+// Config loaded at runtime from Netlify function (keeps secrets out of source code)
+let SUPABASE_URL = '';
+let SUPABASE_ANON_KEY = '';
+
+async function loadConfig() {
+  try {
+    const res = await fetch('/.netlify/functions/config');
+    const cfg = await res.json();
+    SUPABASE_URL = cfg.supabaseUrl;
+    SUPABASE_ANON_KEY = cfg.supabaseAnonKey;
+  } catch(e) {
+    console.error('Failed to load config:', e);
+  }
+}
 const ADMIN_PASSWORD = 'bullyjudge';
 const STORAGE_BUCKET = 'auction-images';
 const GLOBAL_AUCTION_END = new Date('2026-06-20T20:00:00-05:00');
@@ -870,7 +882,8 @@ let adminLoggedIn = false;
 let currentBidder = null; // {name, email, phone, notifyOutbid, notifyWin}
 
 /* ═══════════════════════════ INIT ═══════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadConfig();
   initCountdown();
   loadItems();
   setDefaultEndDate();
