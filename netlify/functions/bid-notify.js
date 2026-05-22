@@ -101,6 +101,10 @@ exports.handler = async (event) => {
     return data;
   }
 
+  function confirmSmsText(bidderName, itemTitle, amount) {
+    return `Rough Riders Auction: Hi ${bidderName}, your bid of $${amount} on "${itemTitle}" is confirmed! You are the current high bidder. ${AUCTION_URL}`;
+  }
+
   async function notify(channel, email, phone, subject, emailHtml, smsText) {
     const sends = [];
     if ((channel === 'email' || channel === 'both') && email) {
@@ -115,6 +119,48 @@ exports.handler = async (event) => {
   /* ─────────────────────────────────────────────
      EMAIL TEMPLATES
   ───────────────────────────────────────────── */
+  function confirmEmailHtml(bidderName, itemTitle, amount, auctionEnd) {
+    return `
+<!DOCTYPE html><html><body style="font-family:Georgia,serif;background:#f5efe0;margin:0;padding:0">
+<div style="max-width:560px;margin:30px auto;background:#ffffff;border:1px solid #d4c5a0;border-top:4px solid #c9a84c;border-radius:6px;overflow:hidden">
+  <div style="background:#0d1f3c;padding:20px 24px;text-align:center">
+    <p style="color:#c9a84c;font-family:Georgia,serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin:0 0 6px">Rough Riders Fishing Tournament</p>
+    <h1 style="color:#f0cf70;font-family:Georgia,serif;font-size:22px;margin:0">⚓ Bid Confirmed</h1>
+  </div>
+  <div style="padding:28px 24px">
+    <h2 style="color:#0d1f3c;font-family:Georgia,serif;font-size:18px;margin:0 0 16px">Your Bid Is In — Bully!</h2>
+    <p style="color:#3a4a5a;font-size:15px;line-height:1.6">Hi ${bidderName},</p>
+    <p style="color:#3a4a5a;font-size:15px;line-height:1.6">
+      Your bid has been placed on <strong>${itemTitle}</strong>.
+    </p>
+    <div style="background:#f5efe0;border:1px solid #d4c5a0;border-left:4px solid #c9a84c;border-radius:4px;padding:16px 20px;margin:20px 0">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;color:#6a7a8a;text-transform:uppercase;letter-spacing:1px">Your Bid</span>
+        <span style="font-family:Georgia,serif;font-size:24px;color:#0d1f3c;font-weight:bold">$${amount.toLocaleString()}</span>
+      </div>
+      <div>
+        <span style="font-size:13px;color:#6a7a8a">You are currently the <strong style="color:#1a6b3a">high bidder</strong></span>
+      </div>
+    </div>
+    <p style="color:#3a4a5a;font-size:14px;line-height:1.6">
+      We'll notify you if you're outbid so you can bid again. The auction closes on <strong>${auctionEnd}</strong>.
+    </p>
+    <div style="text-align:center;margin:24px 0">
+      <a href="${AUCTION_URL}" style="background:#0d1f3c;color:#c9a84c;font-family:Georgia,serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;border-radius:4px;text-decoration:none;display:inline-block">
+        View Auction
+      </a>
+    </div>
+    <p style="color:#6a7a8a;font-size:13px;line-height:1.5">
+      Questions? Contact us at <a href="mailto:fishing@tamparoughriders.org" style="color:#c9a84c">fishing@tamparoughriders.org</a>
+    </p>
+  </div>
+  <div style="background:#f5efe0;padding:14px 24px;text-align:center;border-top:1px solid #d4c5a0">
+    <p style="color:#8a7a5a;font-size:12px;margin:0">1st U.S. Volunteer Cavalry Regiment – Rough Riders, Inc. &bull; Tampa, FL</p>
+  </div>
+</div>
+</body></html>`;
+  }
+
   function outbidEmailHtml(prevName, itemTitle, newAmount) {
     return `
 <!DOCTYPE html><html><body style="font-family:Georgia,serif;background:#f5efe0;margin:0;padding:0">
@@ -218,6 +264,29 @@ exports.handler = async (event) => {
       results.push({ type: 'outbid', to: previous_bidder_email, result: r });
     } catch (e) {
       results.push({ type: 'outbid', error: e.message });
+    }
+  }
+
+  /* ─────────────────────────────────────────────
+     1b. SEND BID CONFIRMATION TO NEW BIDDER
+  ───────────────────────────────────────────── */
+  if (new_bidder_email || new_bidder_phone) {
+    try {
+      const channel = new_bidder_contact_method || 'email';
+      const auctionEnd = 'Saturday, June 20, 2026 at 9:00 PM EDT';
+      const subject = `Bid confirmed: $${new_bid_amount.toLocaleString()} on "${item_title}"`;
+      const emailHtml = confirmEmailHtml(
+        new_bidder_name,
+        item_title,
+        new_bid_amount,
+        auctionEnd
+      );
+      const smsText = confirmSmsText(new_bidder_name.split(' ')[0], item_title, new_bid_amount);
+
+      const r = await notify(channel, new_bidder_email, new_bidder_phone, subject, emailHtml, smsText);
+      results.push({ type: 'confirm', to: new_bidder_email || new_bidder_phone, result: r });
+    } catch(e) {
+      results.push({ type: 'confirm', error: e.message });
     }
   }
 
