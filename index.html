@@ -866,6 +866,66 @@
   </div>
 </div>
 
+<!-- EDIT BIDDER MODAL -->
+<div id="edit-bidder-modal" class="modal-overlay">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeEditBidder()">&#x2715;</button>
+    <h2 style="margin-bottom:4px">&#x270F; Edit Bidder</h2>
+    <p id="edit-bidder-subtitle" style="font-size:13px;color:var(--text-dim);margin-bottom:20px"></p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="eb-name" placeholder="First Last">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="eb-email" placeholder="email@example.com">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="tel" id="eb-phone" placeholder="(813) 555-0100">
+    </div>
+
+    <div style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:16px">
+      <p style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;letter-spacing:.5px">&#x1F514; Notification Preferences</p>
+      <div style="margin-bottom:12px">
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Contact Method</p>
+        <div class="contact-method-row" style="max-width:320px">
+          <button type="button" class="contact-method-btn" id="eb-cm-email" onclick="setEbContactMethod('email')">&#x1F4E7; Email</button>
+          <button type="button" class="contact-method-btn" id="eb-cm-text" onclick="setEbContactMethod('text')">&#x1F4F1; Text</button>
+          <button type="button" class="contact-method-btn" id="eb-cm-both" onclick="setEbContactMethod('both')">Both</button>
+          <button type="button" class="contact-method-btn" id="eb-cm-none" onclick="setEbContactMethod('none')">None</button>
+        </div>
+        <input type="hidden" id="eb-contact-method" value="email">
+      </div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-mid)">
+          <input type="checkbox" id="eb-notify-outbid" style="width:16px;height:16px;accent-color:var(--navy)"> Outbid alerts
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-mid)">
+          <input type="checkbox" id="eb-notify-win" style="width:16px;height:16px;accent-color:var(--navy)"> Win notification
+        </label>
+      </div>
+    </div>
+
+    <div id="eb-sms-consent" style="display:none;background:#fffbf0;border:1px solid #e8d88a;border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--text-mid);line-height:1.6">
+      &#x1F4CB; <strong style="color:#856404">SMS Consent:</strong> Updating to Text or Both confirms this bidder has provided
+      express consent to receive SMS bid notifications. Msg &amp; data rates may apply.
+    </div>
+
+    <p id="eb-error" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none"></p>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-gold" onclick="saveEditBidder()">Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditBidder()">Cancel</button>
+    </div>
+    <p id="eb-save-msg" style="color:var(--green);font-size:13px;margin-top:10px;display:none">&#x2714; Saved successfully.</p>
+  </div>
+</div>
+
+
 <!-- LIGHTBOX -->
 <div id="lightbox">
   <button id="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
@@ -1722,6 +1782,7 @@ function renderBidderTable() {
       <td style="font-size:12px;color:var(--text-dim)">${timeAgo(b.last_bid_at)}<br><span style="color:var(--navy);font-size:11px">$${b.last_bid_amount?.toLocaleString()}</span></td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-gold btn-sm" onclick="openEditBidder('${esc(b.email)}')">Edit</button>
           <button class="btn btn-outline btn-sm" onclick="viewBidderHistory('${esc(b.email)}','${esc(b.name)}')">History</button>
           <button class="btn btn-sm" style="background:#f8d7da;color:#721c24" onclick="optOutBidder('${esc(b.email)}','${esc(b.name)}')">Opt-Out</button>
         </div>
@@ -1789,6 +1850,120 @@ function exportBidders() {
   a.click();
   showToast('CSV downloaded.');
 }
+
+
+/* ═══════════════════════════ EDIT BIDDER ═══════════════════════════ */
+let editingBidderEmail = null;
+
+function openEditBidder(email) {
+  const b = allBidders.find(x => x.email === email);
+  if (!b) return;
+  editingBidderEmail = email;
+
+  document.getElementById('eb-name').value = b.name || '';
+  document.getElementById('eb-email').value = b.email || '';
+  document.getElementById('eb-phone').value = b.phone || '';
+  document.getElementById('eb-notify-outbid').checked = !!b.notify_outbid;
+  document.getElementById('eb-notify-win').checked = !!b.notify_win;
+  document.getElementById('eb-contact-method').value = b.contact_method || 'email';
+  setEbContactMethod(b.contact_method || 'email');
+
+  document.getElementById('edit-bidder-subtitle').textContent = b.email + ' · ' + b.bid_count + ' bid' + (b.bid_count !== 1 ? 's' : '');
+  document.getElementById('eb-error').style.display = 'none';
+  document.getElementById('eb-save-msg').style.display = 'none';
+
+  document.getElementById('edit-bidder-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditBidder() {
+  document.getElementById('edit-bidder-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingBidderEmail = null;
+}
+
+function setEbContactMethod(method) {
+  ['email','text','both','none'].forEach(m => {
+    const btn = document.getElementById('eb-cm-' + m);
+    if (btn) btn.classList.toggle('active', m === method);
+  });
+  document.getElementById('eb-contact-method').value = method;
+  const consent = document.getElementById('eb-sms-consent');
+  if (consent) consent.style.display = (method === 'text' || method === 'both') ? 'block' : 'none';
+}
+
+async function saveEditBidder() {
+  const name    = document.getElementById('eb-name').value.trim();
+  const email   = document.getElementById('eb-email').value.trim();
+  const phone   = document.getElementById('eb-phone').value.trim();
+  const method  = document.getElementById('eb-contact-method').value;
+  const outbid  = document.getElementById('eb-notify-outbid').checked;
+  const win     = document.getElementById('eb-notify-win').checked;
+  const errEl   = document.getElementById('eb-error');
+  const saveMsg = document.getElementById('eb-save-msg');
+
+  if (!name) { errEl.textContent = 'Name is required.'; errEl.style.display = 'block'; return; }
+  if (!email || !email.includes('@')) { errEl.textContent = 'Valid email required.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  const btn = document.querySelector('#edit-bidder-modal .btn-gold');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+
+  try {
+    // Update ALL bids by this email with new prefs
+    await sb(`auction_bids?bidder_email=eq.${encodeURIComponent(editingBidderEmail)}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: {
+        bidder_name: name,
+        bidder_email: email,
+        bidder_phone: phone || null,
+        contact_method: method,
+        notify_outbid: outbid,
+        notify_win: win
+      }
+    });
+
+    // Update local state
+    const idx = allBidders.findIndex(x => x.email === editingBidderEmail);
+    if (idx >= 0) {
+      allBidders[idx] = { ...allBidders[idx], name, email, phone, contact_method: method,
+        notify_outbid: outbid, notify_win: win,
+        sms_optin: method === 'text' || method === 'both' };
+    }
+    filteredBidders = [...allBidders];
+
+    // Update cookie if this is the current bidder
+    const saved = getBidderCookie();
+    if (saved && saved.email === editingBidderEmail) {
+      setBidderCookie({ ...saved, name, email, phone, contactMethod: method, notifyOutbid: outbid, notifyWin: win });
+    }
+
+    editingBidderEmail = email; // in case email changed
+    renderBidderTable();
+    updateBidderStats();
+    saveMsg.style.display = 'block';
+    setTimeout(() => saveMsg.style.display = 'none', 2500);
+    showToast('Bidder updated.');
+  } catch(e) {
+    errEl.textContent = 'Error saving: ' + e.message;
+    errEl.style.display = 'block';
+  }
+  btn.textContent = 'Save Changes'; btn.disabled = false;
+}
+
+function updateBidderStats() {
+  document.getElementById('um-stat-total').textContent = allBidders.length;
+  document.getElementById('um-stat-sms').textContent = allBidders.filter(b => b.sms_optin).length;
+  document.getElementById('um-stat-email').textContent = allBidders.filter(b => b.contact_method === 'email' || b.contact_method === 'both').length;
+}
+
+// Close on backdrop click
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('edit-bidder-modal')?.addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeEditBidder();
+  });
+});
 
 /* ═══════════════════════════ HELPERS ═══════════════════════════ */
 /* ═══════════════════════════ ADMIN NOTIFICATION RECIPIENTS ═══════════════════════════ */
