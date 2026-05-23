@@ -1104,11 +1104,18 @@ function initCountdown() {
 /* ═══════════════════════════ ITEMS ═══════════════════════════ */
 async function loadItems() {
   try {
-    const raw = await sb('auction_items?order=status.asc,created_at.asc&select=*,auction_bids(count)');
-    allItems = (raw||[]).map(item => ({ ...item, bid_count: item.auction_bids?.[0]?.count ?? 0 }));
+    // Simple fetch — no JOIN to avoid schema cache issues
+    const raw = await sb('auction_items?order=status.asc,created_at.asc&select=id,title,description,category,image_url,images,starting_bid,min_increment,current_bid,current_bidder,status,ends_at,winner_status,created_at');
+    if (!raw) { renderItems(); return; }
+    // Fetch bid counts separately
+    const counts = await sb('auction_bids?select=item_id').catch(() => []);
+    const countMap = {};
+    (counts||[]).forEach(b => { countMap[b.item_id] = (countMap[b.item_id]||0) + 1; });
+    allItems = raw.map(item => ({ ...item, bid_count: countMap[item.id] || 0 }));
     renderItems();
   } catch(e) {
-    document.getElementById('items-loading').textContent = 'Error loading items: ' + e.message;
+    document.getElementById('items-loading').textContent = 'Error: ' + e.message;
+    console.error('loadItems error:', e);
   }
 }
 
@@ -1543,8 +1550,10 @@ async function loadAdminItems() {
   const table=document.getElementById('admin-items-table');
   loading.style.display='block'; table.style.display='none';
   try {
-    const rawItems=await sb('auction_items?order=created_at.desc&select=*,auction_bids(count)');
-    const items=(rawItems||[]).map(item => ({ ...item, bid_count: item.auction_bids?.[0]?.count ?? 0 }));
+    const rawItems=await sb('auction_items?order=created_at.desc&select=id,title,description,category,image_url,images,starting_bid,min_increment,current_bid,current_bidder,status,ends_at,winner_status,winner_name,winner_email,winner_phone,winner_bid,created_at');
+    const bidCounts2=await sb('auction_bids?select=item_id').catch(()=>[]);
+    const cMap2={};(bidCounts2||[]).forEach(b=>{cMap2[b.item_id]=(cMap2[b.item_id]||0)+1;});
+    const items=(rawItems||[]).map(item=>({...item,bid_count:cMap2[item.id]||0}));
     allItems=items||[];
     const body=document.getElementById('admin-items-body');
     body.innerHTML=(items||[]).map(item=>{
