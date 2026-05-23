@@ -966,23 +966,18 @@ let SUPABASE_URL = '';
 let SUPABASE_ANON_KEY = '';
 
 async function loadConfig() {
-  // Try the Netlify function first; fall back to env-injected values
   try {
     const res = await fetch('/.netlify/functions/config');
-    if (res.ok) {
-      const cfg = await res.json();
-      if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
-        SUPABASE_URL = cfg.supabaseUrl;
-        SUPABASE_ANON_KEY = cfg.supabaseAnonKey;
-        return;
-      }
-    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const cfg = await res.json();
+    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) throw new Error('Empty config response');
+    SUPABASE_URL = cfg.supabaseUrl;
+    SUPABASE_ANON_KEY = cfg.supabaseAnonKey;
   } catch(e) {
-    console.warn('Config function unavailable, using fallback:', e.message);
+    console.error('Config load failed:', e.message);
+    const el = document.getElementById('items-loading');
+    if (el) el.textContent = 'Could not connect to database. Please refresh the page.';
   }
-  // Fallback values (anon key is safe to include — it is public by design)
-  SUPABASE_URL = 'https://qyoqyeaqacdjstvkonwx.supabase.co';
-  SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5b3F5ZWFxYWNkanN0dmtvbnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NjUzMzMsImV4cCI6MjA4ODM0MTMzM30.Ln-i6P0qZlmGYoD-bC9xAlggyjt36bXXQfrqmHi-LLo';
 }
 const ADMIN_PASSWORD = 'bullyjudge';
 const STORAGE_BUCKET = 'auction-images';
