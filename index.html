@@ -633,19 +633,23 @@
             <input type="number" id="f-increment" min="1" step="1" value="5">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Auction End Date &amp; Time</label>
-            <input type="datetime-local" id="f-ends-at">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;margin-bottom:14px">
+          <p style="font-size:12px;font-weight:700;color:#1e3a5f;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">&#x23F0; Item Close Date &amp; Status</p>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0">
+              <label>Closes At (date &amp; time)</label>
+              <input type="datetime-local" id="f-ends-at">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Status</label>
+              <select id="f-status">
+                <option value="open">Open — accepting bids</option>
+                <option value="upcoming">Upcoming — not yet open</option>
+                <option value="closed">Closed — ended</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="f-status">
-              <option value="open">Open</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
+          <p style="font-size:12px;color:#6b7280;margin-top:8px">&#x1F4A1; Each item can have its own close date. Use <strong>Close &amp; Notify</strong> in the items table to close early and alert the winner.</p>
         </div>
         <div style="display:flex;gap:12px;flex-wrap:wrap">
           <button class="btn btn-gold" onclick="saveItem()">Save Item</button>
@@ -1626,7 +1630,12 @@ async function loadAdminItems() {
         <td style="color:var(--navy);font-family:'Cinzel',serif;font-weight:600">$${bid.toLocaleString()}</td>
         <td>${item.bid_count||0}</td>
         <td><span class="status-badge ${item.status}" style="position:static;display:inline-block">${item.status}</span></td>
-        <td style="font-size:12px">${ends}</td>
+        <td style="font-size:12px">
+          ${item.ends_at
+            ? `<div>${ends}</div><div style="color:${new Date(item.ends_at)<new Date()?'#dc2626':'#6b7280'};font-size:11px;margin-top:2px">${new Date(item.ends_at)<new Date()?'⏰ Past due':''+itemTimerHTML(item.ends_at)}</div>`
+            : '<span style="color:#9ca3af">No date set</span>'
+          }
+        </td>
         <td>${winnerBadge(item)}</td>
         <td><div class="actions-cell">
           <button class="btn btn-outline btn-sm" onclick="editItem('${item.id}')">Edit</button>
@@ -1753,8 +1762,10 @@ function clearItemForm() {
 }
 
 function setDefaultEndDate() {
-  const d=new Date(GLOBAL_AUCTION_END);
-  document.getElementById('f-ends-at').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  // Leave blank — admin sets per-item close date
+  // Uncomment below to default to tournament end date:
+  // const d=new Date(GLOBAL_AUCTION_END);
+  // document.getElementById('f-ends-at').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
 }
 
 /* ═══════════════════════════ LIGHTBOX ═══════════════════════════ */
@@ -2089,23 +2100,51 @@ function winnerBadge(item) {
 }
 
 async function closeAndNotify(itemId) {
-  if (!confirm('Close this item and notify the winner? This will send an email/text to the highest bidder asking them to confirm their win.')) return;
+  const item = allItems.find(i => i.id === itemId);
+  const title = item ? item.title : 'this item';
+  const highBid = item?.current_bid || item?.starting_bid || 0;
+  const bidder = item?.current_bidder;
+
+  const msg = bidder
+    ? `Close "${title}"?
+
+Current high bid: $${highBid} by ${bidder}
+
+This will send a winner confirmation email/text to the high bidder. They have 48 hours to confirm.`
+    : `Close "${title}"?
+
+No bids have been placed. The item will be marked as ended with no winner.`;
+
+  if (!confirm(msg)) return;
+
+  // Show working state
+  const btn = event?.target;
+  if (btn) { btn.textContent = 'Closing…'; btn.disabled = true; }
+
   try {
     const res = await fetch('/.netlify/functions/close-auction', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ item_id: itemId })
     });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Server error ${res.status}: ${errText}`);
+    }
+
     const data = await res.json();
     if (data.winner) {
-      showToast(`Closed! Winner notification sent to ${data.winner} ($${data.amount?.toLocaleString()})`);
+      showToast(`✅ Closed! Winner notification sent to ${data.winner} ($${Number(data.amount).toLocaleString()})`);
     } else {
       showToast('Item closed — no bids were placed.');
     }
     await loadItems();
     await loadAdminItems();
   } catch(e) {
-    showToast('Error closing item: ' + e.message);
+    console.error('closeAndNotify error:', e);
+    alert('Error closing item:\n' + e.message + '\n\nCheck Netlify function logs for details.');
+    if (btn) { btn.textContent = 'Close & Notify'; btn.disabled = false; }
   }
 }
 
