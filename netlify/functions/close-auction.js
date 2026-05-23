@@ -95,7 +95,11 @@ exports.handler = async (event) => {
 
   // ── 3. Generate confirmation token ──
   const token = Buffer.from(`${item_id}:${winnerBid.bidder_email}:${Date.now()}`).toString('base64url');
-  const confirmDeadline = new Date(Date.now() + CONFIRM_HOURS * 3600000).toISOString();
+  // Use item's actual ends_at if it exists and is in the future, otherwise 48hr from now
+  const itemEndsAt = item.ends_at ? new Date(item.ends_at) : null;
+  const confirmDeadline = (itemEndsAt && itemEndsAt > new Date())
+    ? itemEndsAt.toISOString()
+    : new Date(Date.now() + CONFIRM_HOURS * 3600000).toISOString();
   const confirmUrl = `${AUCTION_URL}/?confirm=${token}`;
   const declineUrl = `${AUCTION_URL}/?decline=${token}`;
 
