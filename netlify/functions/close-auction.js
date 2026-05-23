@@ -27,18 +27,25 @@ exports.handler = async (event) => {
   const results = [];
 
   async function sbFetch(path, opts = {}) {
+    const method = opts.method || 'GET';
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      ...opts.headers
+    };
+    // Only set Prefer header for writes
+    if (method !== 'GET') {
+      headers['Prefer'] = opts.prefer || 'return=minimal';
+    }
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': opts.prefer || 'return=representation',
-        ...opts.headers
-      },
-      method: opts.method || 'GET',
+      headers,
+      method,
       body: opts.body ? JSON.stringify(opts.body) : undefined
     });
+    console.log(`sbFetch ${method} ${path} -> ${res.status}`);
     const text = await res.text();
+    if (!res.ok) console.error('sbFetch error body:', text.substring(0, 300));
     return text ? JSON.parse(text) : null;
   }
 
