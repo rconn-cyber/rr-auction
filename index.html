@@ -155,14 +155,16 @@
   }
   .item-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(30,58,95,0.12); border-color: var(--navy); }
   .item-card.closed {
-    opacity: 1;
-    background: #f9fafb;
-    filter: grayscale(40%);
+    opacity: 0.52;
+    background: #f1f5f9;
+    filter: grayscale(60%);
     cursor: default;
   }
   .item-card.closed:hover { transform: none; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-color: var(--border); }
   .item-card.closed .item-title { color: var(--text-dim); }
   .item-card.closed .bid-amount { color: var(--text-dim); }
+  .item-card.closed .item-img { opacity: 0.7; }
+  .item-card.closed .item-img-placeholder { opacity: 0.7; }
 
   .item-img { width: 100%; height: 180px; object-fit: contain; display: block; background: #ffffff; cursor:zoom-in; transition: opacity .15s; padding: 6px; }
   .item-img:hover { opacity:.85; }
