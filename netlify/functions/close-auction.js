@@ -13,7 +13,9 @@ exports.handler = async (event) => {
   if (!item_id) return { statusCode: 400, body: 'item_id required' };
 
   const SUPABASE_URL   = process.env.SUPABASE_URL;
-  const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_KEY;
+  const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+  console.log('Using key type:', process.env.SUPABASE_SERVICE_KEY ? 'service_role' : 'anon');
+  console.log('Item ID received:', item_id);
   const RESEND_KEY     = process.env.RESEND_API_KEY;
   const TWILIO_SID     = process.env.TWILIO_ACCOUNT_SID;
   const TWILIO_TOKEN   = process.env.TWILIO_AUTH_TOKEN;
@@ -79,7 +81,8 @@ exports.handler = async (event) => {
   // ── 1. Get item details ──
   const items = await sbFetch(`auction_items?id=eq.${item_id}&select=*`);
   const item = items?.[0];
-  if (!item) return { statusCode: 404, body: 'Item not found' };
+  console.log('Items found:', items?.length, 'First:', item?.id);
+  if (!item) return { statusCode: 404, body: JSON.stringify({ ok: false, msg: `Item not found. ID: ${item_id}. Items returned: ${JSON.stringify(items)}` }) };
 
   // ── 2. Get highest bidder ──
   const bids = await sbFetch(`auction_bids?item_id=eq.${item_id}&order=amount.desc&limit=1&select=*`);
