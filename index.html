@@ -595,7 +595,7 @@
         <div id="admin-items-table" style="display:none;overflow-x:auto">
           <table class="admin-table">
             <thead>
-              <tr><th>Item</th><th>Category</th><th>Start</th><th>Current Bid</th><th>Bids</th><th>Status</th><th>Ends</th><th>Actions</th></tr>
+              <tr><th>Item</th><th>Category</th><th>Start</th><th>Current Bid</th><th>Bids</th><th>Status</th><th>Winner</th><th>Ends</th><th>Actions</th></tr>
             </thead>
             <tbody id="admin-items-body"></tbody>
           </table>
@@ -932,6 +932,24 @@
 </div>
 
 
+<!-- WINNER CONFIRMATION OVERLAY -->
+<div id="winner-confirm-overlay" style="display:none;position:fixed;inset:0;background:#f9fafb;z-index:3000;overflow-y:auto;padding:40px 16px">
+  <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12)">
+    <div id="wcl-header" style="background:#1e3a5f;padding:28px 24px;text-align:center">
+      <p style="color:rgba(255,255,255,0.6);font-size:11px;letter-spacing:3px;text-transform:uppercase;margin:0 0 8px">Rough Riders Fishing Tournament</p>
+      <h1 id="wcl-title" style="color:#ffffff;font-size:26px;margin:0;font-weight:700">⏳ Processing…</h1>
+    </div>
+    <div id="wcl-body" style="padding:32px 28px;text-align:center">
+      <div id="wcl-loading" style="color:#6b7280;font-size:15px">Please wait…</div>
+      <div id="wcl-result" style="display:none">
+        <p id="wcl-msg" style="font-size:16px;color:#374151;line-height:1.6;margin-bottom:24px"></p>
+        <p id="wcl-sub" style="font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:28px"></p>
+        <a href="/" style="background:#1e3a5f;color:#ffffff;font-weight:600;font-size:15px;padding:13px 32px;border-radius:8px;text-decoration:none;display:inline-block">Back to Auction</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div id="lightbox">
   <button id="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
@@ -1027,6 +1045,7 @@ let currentBidder = null; // {name, email, phone, notifyOutbid, notifyWin}
 /* ═══════════════════════════ INIT ═══════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
   await loadConfig();
+  handleWinnerConfirmUrl(); // check for ?confirm= or ?decline= in URL
   initCountdown();
   loadItems();
   setDefaultEndDate();
@@ -1530,11 +1549,13 @@ async function loadAdminItems() {
         <td>${item.bid_count||0}</td>
         <td><span class="status-badge ${item.status}" style="position:static;display:inline-block">${item.status}</span></td>
         <td style="font-size:12px">${ends}</td>
+        <td>${winnerBadge(item)}</td>
         <td><div class="actions-cell">
           <button class="btn btn-outline btn-sm" onclick="editItem('${item.id}')">Edit</button>
-          <button class="btn btn-sm" style="background:${item.status==='open'?'#fee2e2;color:#991b1b':'#dcfce7;color:#166534'}" onclick="toggleStatus('${item.id}','${item.status}')">
-            ${item.status==='open'?'Close':'Open'}
-          </button>
+          ${item.status==='open'
+            ? `<button class="btn btn-sm" style="background:#fee2e2;color:#991b1b" onclick="closeAndNotify('${item.id}')">Close &amp; Notify</button>`
+            : `<button class="btn btn-sm" style="background:#dcfce7;color:#166534" onclick="toggleStatus('${item.id}','${item.status}')">Re-Open</button>`
+          }
           <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}')">Del</button>
         </div></td>
       </tr>`;
@@ -1970,6 +1991,95 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === e.currentTarget) closeEditBidder();
   });
 });
+
+
+/* ═══════════════════════════ WINNER CONFIRMATION ═══════════════════════════ */
+function winnerBadge(item) {
+  if (!item.winner_status || item.winner_status === 'no_bids') return '<span style="color:var(--text-dim);font-size:12px">—</span>';
+  const styles = {
+    pending:   'background:#fef3c7;color:#92400e;border:1px solid #fde68a',
+    confirmed: 'background:#dcfce7;color:#166534;border:1px solid #bbf7d0',
+    declined:  'background:#fee2e2;color:#991b1b;border:1px solid #fecaca'
+  };
+  const labels = { pending: '⏳ Pending', confirmed: '✅ Confirmed', declined: '❌ Declined' };
+  const s = item.winner_status;
+  return `<span style="font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;${styles[s]||''}">${labels[s]||s}</span>`;
+}
+
+async function closeAndNotify(itemId) {
+  if (!confirm('Close this item and notify the winner? This will send an email/text to the highest bidder asking them to confirm their win.')) return;
+  try {
+    const res = await fetch('/.netlify/functions/close-auction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item_id: itemId })
+    });
+    const data = await res.json();
+    if (data.winner) {
+      showToast(`Closed! Winner notification sent to ${data.winner} ($${data.amount?.toLocaleString()})`);
+    } else {
+      showToast('Item closed — no bids were placed.');
+    }
+    await loadItems();
+    await loadAdminItems();
+  } catch(e) {
+    showToast('Error closing item: ' + e.message);
+  }
+}
+
+async function handleWinnerConfirmUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const confirmToken = params.get('confirm');
+  const declineToken = params.get('decline');
+  const token  = confirmToken || declineToken;
+  const action = confirmToken ? 'confirm' : declineToken ? 'decline' : null;
+  if (!token || !action) return;
+
+  // Show the confirmation overlay
+  document.getElementById('winner-confirm-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const res = await fetch('/.netlify/functions/winner-confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, action })
+    });
+    const data = await res.json();
+
+    const header  = document.getElementById('wcl-header');
+    const title   = document.getElementById('wcl-title');
+    const msg     = document.getElementById('wcl-msg');
+    const sub     = document.getElementById('wcl-sub');
+    document.getElementById('wcl-loading').style.display = 'none';
+    document.getElementById('wcl-result').style.display  = 'block';
+
+    if (data.alreadyActed) {
+      title.textContent = data.action === 'confirmed' ? '✅ Already Confirmed' : '❌ Already Declined';
+      msg.textContent = `You already ${data.action} your win on "${data.title}".`;
+      sub.textContent = 'No further action needed.';
+    } else if (data.expired) {
+      header.style.background = '#6b7280';
+      title.textContent = '⏰ Link Expired';
+      msg.textContent = 'Your confirmation deadline has passed.';
+      sub.textContent = 'Please contact fishing@tamparoughriders.org if you still wish to claim this item.';
+    } else if (action === 'confirm') {
+      header.style.background = '#15803d';
+      title.textContent = '🏆 Win Confirmed!';
+      msg.innerHTML = `You've confirmed your winning bid of <strong>$${data.amount?.toLocaleString()}</strong> on <strong>"${data.title}"</strong>.`;
+      sub.textContent = 'Payment arrangements will be made at or before the tournament. We'll be in touch soon. Thank you!';
+    } else {
+      header.style.background = '#dc2626';
+      title.textContent = '❌ Win Declined';
+      msg.innerHTML = `You've declined the win on <strong>"${data.title}"</strong>.`;
+      sub.textContent = 'No problem — we'll notify the next highest bidder. Thanks for letting us know.';
+    }
+    // Clean up URL
+    window.history.replaceState({}, '', '/');
+  } catch(e) {
+    document.getElementById('wcl-loading').textContent = 'Error: ' + e.message;
+  }
+}
 
 /* ═══════════════════════════ HELPERS ═══════════════════════════ */
 /* ═══════════════════════════ ADMIN NOTIFICATION RECIPIENTS ═══════════════════════════ */
