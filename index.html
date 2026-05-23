@@ -6,6 +6,7 @@
 <title>Rough Riders Fishing Tournament — Online Auction</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+  @import url('https://cdn.quilljs.com/1.3.7/quill.snow.css');
 
   :root {
     --navy: #1e3a5f;
@@ -455,6 +456,64 @@
   .contact-method-btn.active { background: var(--navy); color: #ffffff; font-weight: 600; }
   .contact-method-btn:hover:not(.active) { background: var(--page-bg); color: var(--text); }
 
+
+  /* ── RICH TEXT EDITOR ── */
+  #rte-container {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+  }
+  #rte-container .ql-toolbar {
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    padding: 8px 10px;
+  }
+  #rte-container .ql-container {
+    border: none;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px;
+    min-height: 120px;
+    color: var(--text);
+  }
+  #rte-container .ql-editor {
+    padding: 12px 14px;
+    min-height: 120px;
+  }
+  #rte-container .ql-editor.ql-blank::before {
+    color: #9ca3af;
+    font-style: normal;
+  }
+  #rte-container:focus-within {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
+  }
+
+  /* ── RENDERED RICH TEXT (card preview + modal) ── */
+  .rte-content { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+  .rte-content p { margin: 0 0 6px; }
+  .rte-content p:last-child { margin-bottom: 0; }
+  .rte-content strong, .rte-content b { font-weight: 700; color: var(--text-mid); }
+  .rte-content em, .rte-content i { font-style: italic; }
+  .rte-content ul, .rte-content ol { padding-left: 20px; margin: 4px 0 8px; }
+  .rte-content li { margin-bottom: 3px; }
+  .rte-content h1, .rte-content h2, .rte-content h3 {
+    font-family: 'Source Sans 3', sans-serif; font-weight: 700;
+    color: var(--text); margin: 8px 0 4px; line-height: 1.3;
+  }
+  .rte-content h1 { font-size: 18px; }
+  .rte-content h2 { font-size: 16px; }
+  .rte-content h3 { font-size: 14px; }
+  .rte-content a { color: var(--navy); text-decoration: underline; }
+  .rte-content blockquote {
+    border-left: 3px solid var(--border); padding-left: 12px;
+    margin: 6px 0; color: var(--text-dim); font-style: italic;
+  }
+
+  /* Modal description gets slightly larger text */
+  #modal-desc-wrap.rte-content { font-size: 15px; color: var(--text-mid); }
+
   @media (max-width: 600px) {
     .items-grid { grid-template-columns: 1fr; gap: 20px; }
     main { padding: 16px 12px 60px; }
@@ -550,7 +609,10 @@
         </div>
         <div class="form-group">
           <label>Description</label>
-          <textarea id="f-description" placeholder="Describe the item, value, donor, etc."></textarea>
+          <div id="rte-container">
+            <div id="quill-editor"></div>
+          </div>
+          <input type="hidden" id="f-description">
         </div>
 
         <!-- MULTI-IMAGE UPLOAD (up to 4) -->
@@ -762,7 +824,7 @@
       onclick="openLightbox(this.src, document.getElementById('modal-title').textContent)">
     <div class="gallery-thumbs" id="modal-gallery-thumbs"></div>
   </div>
-    <p class="modal-desc" id="modal-desc"></p>
+    <div class="modal-desc rte-content" id="modal-desc-wrap"></div>
 
     <div class="current-bid-box">
       <div>
@@ -1150,7 +1212,7 @@ function itemCardHTML(item) {
     <div class="item-body">
       <div class="item-cat">${esc(item.category||'General')}</div>
       <div class="item-title">${esc(item.title)}</div>
-      <div class="item-desc">${esc((item.description||'').substring(0,100))}${(item.description||'').length>100?'…':''}</div>
+      <div class="item-desc rte-content">${truncateHtml(item.description||'', 120)}</div>
       <div class="item-bid-row">
         <div>
           <div class="bid-label">${item.current_bidder?'Current Bid':'Starting Bid'}</div>
@@ -1209,7 +1271,7 @@ async function openItem(id) {
   } else {
     galleryDiv.style.display = 'none';
   }
-  document.getElementById('modal-desc').textContent = item.description || '';
+  const descWrap = document.getElementById('modal-desc-wrap'); if(descWrap) descWrap.innerHTML = sanitizeHtml(item.description || '');
   updateModalBidInfo(item);
 
   const isOpen = item.status === 'open';
@@ -1536,6 +1598,7 @@ function adminLogin() {
     document.getElementById('admin-panel').classList.add('visible');
     itemImages=['','','',''];
     initUploadSlots();
+    setTimeout(initQuillEditor, 50); // init after DOM paints
     loadAdminData();
   } else { document.getElementById('admin-login-err').style.display='block'; }
 }
@@ -1602,7 +1665,7 @@ async function saveItem() {
   const imageUrl=document.getElementById('f-image-url').value||null;
   const payload={
     title:document.getElementById('f-title').value.trim(),
-    description:document.getElementById('f-description').value.trim(),
+    description: (window.quillEditor ? window.quillEditor.root.innerHTML.trim() : document.getElementById('f-description').value.trim()),
     category:document.getElementById('f-category').value,
     image_url:imageUrl||null,
     images: JSON.stringify(itemImages.filter(u=>u)),
@@ -1632,6 +1695,9 @@ function editItem(id) {
   document.getElementById('edit-item-id').value=id;
   document.getElementById('f-title').value=item.title||'';
   document.getElementById('f-description').value=item.description||'';
+  if (window.quillEditor) {
+    window.quillEditor.root.innerHTML = item.description || '';
+  }
   document.getElementById('f-category').value=item.category||'General';
   // Restore images array
   if (item.images) {
@@ -1673,6 +1739,7 @@ async function deleteItem(id) {
 
 function clearItemForm() {
   ['edit-item-id','f-title','f-description','f-image-url'].forEach(id=>document.getElementById(id).value='');
+  if (window.quillEditor) window.quillEditor.setText('');
   itemImages=['','','',''];
   initUploadSlots();
   document.getElementById('f-category').value='Fishing Gear';
@@ -2196,6 +2263,68 @@ async function saveAdminRecipients() {
 function esc(str){if(!str)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function timeAgo(ts){if(!ts)return'';const diff=Date.now()-new Date(ts).getTime();const m=Math.floor(diff/60000);if(m<1)return'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+</script>
+<!-- Quill RTE -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script>
+/* ── QUILL INIT (runs after admin panel is shown) ── */
+function initQuillEditor() {
+  if (window.quillEditor) return; // already initialized
+  const el = document.getElementById('quill-editor');
+  if (!el) return;
+  window.quillEditor = new Quill('#quill-editor', {
+    theme: 'snow',
+    placeholder: 'Describe the item — donor, value, condition, special features…',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        [{ 'header': [2, 3, false] }],
+        ['link', 'clean']
+      ]
+    }
+  });
+  // Sync to hidden input on change
+  window.quillEditor.on('text-change', () => {
+    const hiddenInput = document.getElementById('f-description');
+    if (hiddenInput) hiddenInput.value = window.quillEditor.root.innerHTML;
+  });
+}
+
+/* ── SAFE HTML SANITIZER (allow only basic formatting tags) ── */
+function sanitizeHtml(html) {
+  if (!html) return '';
+  // Only allow safe formatting tags
+  const allowed = ['p','br','strong','b','em','i','u','ul','ol','li','h2','h3','a','blockquote','span'];
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  // Remove script/style/etc
+  div.querySelectorAll('script,style,iframe,object,embed').forEach(el => el.remove());
+  // Remove dangerous attributes
+  div.querySelectorAll('*').forEach(el => {
+    ['onclick','onload','onerror','href'].forEach(attr => {
+      if (attr === 'href') {
+        const val = el.getAttribute('href') || '';
+        if (val.toLowerCase().startsWith('javascript:')) el.removeAttribute('href');
+      } else {
+        el.removeAttribute(attr);
+      }
+    });
+  });
+  return div.innerHTML;
+}
+
+/* ── TRUNCATE HTML to ~N chars of text content ── */
+function truncateHtml(html, maxChars) {
+  if (!html) return '';
+  // Strip tags for length check
+  const div = document.createElement('div');
+  div.innerHTML = sanitizeHtml(html);
+  const text = div.textContent || '';
+  if (text.length <= maxChars) return sanitizeHtml(html);
+  // Return plain truncated text for card preview
+  return esc(text.substring(0, maxChars)) + '&hellip;';
+}
 </script>
 </body>
 </html>
