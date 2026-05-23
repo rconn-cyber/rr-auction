@@ -2085,12 +2085,12 @@ async function handleWinnerConfirmUrl() {
       header.style.background = '#15803d';
       title.textContent = '🏆 Win Confirmed!';
       msg.innerHTML = `You've confirmed your winning bid of <strong>$${data.amount?.toLocaleString()}</strong> on <strong>"${data.title}"</strong>.`;
-      sub.textContent = 'Payment arrangements will be made at or before the tournament. We'll be in touch soon. Thank you!';
+      sub.textContent = 'Payment arrangements will be made at or before the tournament. We\'ll be in touch soon. Thank you!';
     } else {
       header.style.background = '#dc2626';
       title.textContent = '❌ Win Declined';
       msg.innerHTML = `You've declined the win on <strong>"${data.title}"</strong>.`;
-      sub.textContent = 'No problem — we'll notify the next highest bidder. Thanks for letting us know.';
+      sub.textContent = 'No problem — we will notify the next highest bidder. Thanks for letting us know.';
     }
     // Clean up URL
     window.history.replaceState({}, '', '/');
