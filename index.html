@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rough Riders Fishing Tournament — Online Auction</title>
+<title>Rough Riders Fishing Tournament — Live Auction</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap');
   @import url('https://cdn.quilljs.com/1.3.7/quill.snow.css');
@@ -526,9 +526,10 @@
 <body>
 
 <header>
-  <div class="header-badge">31st Annual Fishing Tournament</div>
-  <h1><span class="anchor-deco">⚓</span> Online Auction <span class="anchor-deco">⚓</span></h1>
-  <p class="subtitle">Rough Riders Fishing Tournament &bull; Treasure Island, FL &bull; June 19–20, 2026</p>
+  <div class="header-badge">31st Annual Fishing Tournament &bull; Live Auction</div>
+  <h1><span class="anchor-deco">⚓</span> Live Auction <span class="anchor-deco">⚓</span></h1>
+  <p class="subtitle">Bid online now &bull; Live floor bidding June 20 at the Awards Banquet &bull; Treasure Island, FL</p>
+  <p style="margin-top:10px;font-size:13px;color:rgba(255,255,255,0.55)">Can't attend? Bid online and we'll call you if you're outbid during the live auction.</p>
 </header>
 
 <div class="tab-bar">
@@ -680,6 +681,46 @@
             </thead>
             <tbody id="admin-bids-body"></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- PHONE-IN BID -->
+      <div class="admin-section" style="border-left:4px solid var(--gold)">
+        <h3>📞 Enter Phone-In Bid</h3>
+        <p style="font-size:14px;color:var(--text-dim);margin-bottom:18px;line-height:1.6">
+          Use this form to enter a bid on behalf of a floor or phone bidder. The bid will be recorded under their name and marked as a phone-in bid. Outbid notifications will be sent to any online bidder who gets displaced.
+        </p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Bidder Name *</label>
+            <input type="text" id="ph-name" placeholder="First Last">
+          </div>
+          <div class="form-group">
+            <label>Auction Item *</label>
+            <select id="ph-item">
+              <option value="">— Select item —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Bid Amount ($) *</label>
+            <input type="number" id="ph-amount" min="0" step="1" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Bidder Phone <span style="font-weight:400;color:var(--text-dim)">(optional — for records)</span></label>
+            <input type="tel" id="ph-phone" placeholder="(813) 555-0100">
+          </div>
+        </div>
+        <div style="background:#fffbf0;border:1px solid #e8d88a;border-radius:6px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-mid);line-height:1.6">
+          <strong style="color:#856404">📋 Current high bids:</strong>
+          <div id="ph-current-bids" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px"></div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-gold" onclick="submitPhoneInBid()">📞 Record Phone-In Bid</button>
+          <button class="btn btn-outline" onclick="clearPhoneInForm()">Clear</button>
+          <p id="ph-error" style="color:var(--red);font-size:13px;margin:0;display:none"></p>
+          <p id="ph-success" style="color:var(--green);font-size:13px;margin:0;display:none"></p>
         </div>
       </div>
 
@@ -1607,7 +1648,7 @@ function adminLogin() {
   } else { document.getElementById('admin-login-err').style.display='block'; }
 }
 
-async function loadAdminData() { await loadAdminItems(); await loadAdminBids(); await loadAdminRecipients(); await loadBidderList(); }
+async function loadAdminData() { await loadAdminItems(); await loadAdminBids(); await loadAdminRecipients(); await loadBidderList(); populatePhoneInItems(); refreshPhoneInCurrentBids(); }
 
 async function loadAdminItems() {
   const loading=document.getElementById('admin-items-loading');
@@ -1658,13 +1699,19 @@ async function loadAdminBids() {
   try {
     const bids=await sb('auction_bids?order=created_at.desc&limit=50&select=*,auction_items(title)');
     const body=document.getElementById('admin-bids-body');
-    body.innerHTML=(bids||[]).map(b=>`<tr>
-      <td>${esc(b.auction_items?.title||b.item_id)}</td>
-      <td>${esc(b.bidder_name)}</td>
-      <td style="color:var(--text-dim)">${esc(b.bidder_email)}</td>
-      <td style="color:var(--navy);font-family:'Cinzel',serif;font-weight:600">$${b.amount.toLocaleString()}</td>
-      <td style="color:var(--text-dim);font-size:12px">${timeAgo(b.created_at)}</td>
-    </tr>`).join('')||'<tr><td colspan="5" style="color:var(--text-dim);text-align:center">No bids yet.</td></tr>';
+    body.innerHTML=(bids||[]).map(b=>{
+      const isPhoneIn = b.bidder_email && b.bidder_email.startsWith('phonein+');
+      const nameBadge = isPhoneIn
+        ? `<span style="font-size:11px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:2px 7px;border-radius:10px;margin-left:5px">📞 phone-in</span>`
+        : '';
+      return `<tr${isPhoneIn?' style="background:#fffdf0"':''}>
+        <td>${esc(b.auction_items?.title||b.item_id)}</td>
+        <td>${esc(b.bidder_name)}${nameBadge}</td>
+        <td style="color:var(--text-dim)">${isPhoneIn?'<span style="color:var(--text-dim);font-style:italic">phone-in</span>':esc(b.bidder_email)}</td>
+        <td style="color:var(--navy);font-family:'Cinzel',serif;font-weight:600">$${b.amount.toLocaleString()}</td>
+        <td style="color:var(--text-dim);font-size:12px">${timeAgo(b.created_at)}</td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="5" style="color:var(--text-dim);text-align:center">No bids yet.</td></tr>';
     loading.style.display='none'; table.style.display='block';
   } catch(e) { loading.textContent='Error: '+e.message; }
 }
@@ -2203,6 +2250,147 @@ async function handleWinnerConfirmUrl() {
 }
 
 /* ═══════════════════════════ HELPERS ═══════════════════════════ */
+/* ═══════════════════════════ PHONE-IN BIDS ═══════════════════════════ */
+function populatePhoneInItems() {
+  const sel = document.getElementById('ph-item');
+  if (!sel) return;
+  const openItems = allItems.filter(i => i.status === 'open');
+  sel.innerHTML = '<option value="">— Select item —</option>' +
+    openItems.map(i => `<option value="${i.id}">${esc(i.title)} — Current: $${(i.current_bid||i.starting_bid||0).toLocaleString()}</option>`).join('');
+}
+
+function refreshPhoneInCurrentBids() {
+  const el = document.getElementById('ph-current-bids');
+  if (!el) return;
+  const openItems = allItems.filter(i => i.status === 'open');
+  if (!openItems.length) { el.innerHTML = '<span style="color:var(--text-dim);font-size:13px">No open items.</span>'; return; }
+  el.innerHTML = openItems.map(i => {
+    const bid = i.current_bid || i.starting_bid || 0;
+    const leader = i.current_bidder ? ` · ${i.current_bidder}` : ' · no bids yet';
+    return `<span style="background:var(--page-bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;white-space:nowrap">
+      <strong style="color:var(--navy)">${esc(i.title.length>30?i.title.slice(0,30)+'…':i.title)}</strong>
+      &nbsp;<span style="color:var(--gold-dim);font-weight:700">$${bid.toLocaleString()}</span>
+      <span style="color:var(--text-dim)">${esc(leader)}</span>
+    </span>`;
+  }).join('');
+}
+
+async function submitPhoneInBid() {
+  const name   = document.getElementById('ph-name').value.trim();
+  const itemId = document.getElementById('ph-item').value;
+  const amount = parseFloat(document.getElementById('ph-amount').value);
+  const phone  = document.getElementById('ph-phone').value.trim();
+  const errEl  = document.getElementById('ph-error');
+  const okEl   = document.getElementById('ph-success');
+  errEl.style.display = 'none';
+  okEl.style.display  = 'none';
+
+  if (!name)   { errEl.textContent = 'Bidder name is required.'; errEl.style.display = 'block'; return; }
+  if (!itemId) { errEl.textContent = 'Please select an item.';   errEl.style.display = 'block'; return; }
+  if (!amount || isNaN(amount)) { errEl.textContent = 'Please enter a valid bid amount.'; errEl.style.display = 'block'; return; }
+
+  const item = allItems.find(i => i.id === itemId);
+  if (!item) { errEl.textContent = 'Item not found.'; errEl.style.display = 'block'; return; }
+
+  const minBid = (item.current_bid || item.starting_bid || 0) + (item.min_increment || 5);
+  if (amount < minBid) {
+    errEl.textContent = `Minimum bid is $${minBid.toLocaleString()} (current $${(item.current_bid||item.starting_bid||0).toLocaleString()} + $${item.min_increment||5} increment).`;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.querySelector('#ph-success')?.closest('.admin-section')?.querySelector('.btn-gold');
+  if (btn) { btn.textContent = 'Recording…'; btn.disabled = true; }
+
+  try {
+    // Capture previous high bidder for outbid notification
+    let prevBidder = null;
+    try {
+      const prevBids = await sb(`auction_bids?item_id=eq.${itemId}&order=amount.desc&limit=1&select=bidder_name,bidder_email,bidder_phone,notify_outbid,contact_method`);
+      if (prevBids && prevBids[0]) prevBidder = prevBids[0];
+    } catch {}
+
+    const phoneInEmail = `phonein+${Date.now()}@roughridersfishing.org`;
+    await sb('auction_bids', {
+      method: 'POST',
+      body: {
+        item_id: itemId,
+        bidder_name: name + ' (phone-in)',
+        bidder_email: phoneInEmail,
+        bidder_phone: phone || null,
+        amount,
+        notify_outbid: false,
+        notify_win: false,
+        contact_method: 'none'
+      },
+      prefer: 'return=minimal'
+    });
+
+    const shortName = name.split(' ')[0] + ' ' + (name.split(' ')[1]?.[0] || '') + '. 📞';
+    await sb(`auction_items?id=eq.${itemId}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: { current_bid: amount, current_bidder: shortName }
+    });
+
+    // Notify displaced online bidder
+    if (prevBidder && prevBidder.bidder_email && !prevBidder.bidder_email.startsWith('phonein+')) {
+      fetch('/.netlify/functions/bid-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_id: itemId,
+          item_title: item.title,
+          new_bid_amount: amount,
+          new_bidder_name: name + ' (phone-in)',
+          new_bidder_email: phoneInEmail,
+          new_bidder_phone: phone || '',
+          new_bidder_notify_outbid: false,
+          new_bidder_notify_win: false,
+          new_bidder_contact_method: 'none',
+          previous_bidder_name: prevBidder.bidder_name,
+          previous_bidder_email: prevBidder.bidder_email,
+          previous_bidder_phone: prevBidder.bidder_phone || '',
+          previous_bidder_notify_outbid: prevBidder.notify_outbid ?? true,
+          previous_bidder_contact_method: prevBidder.contact_method || 'email'
+        })
+      }).catch(() => {});
+    }
+
+    // Update local state
+    const idx = allItems.findIndex(i => i.id === itemId);
+    if (idx >= 0) {
+      allItems[idx].current_bid = amount;
+      allItems[idx].current_bidder = shortName;
+      allItems[idx].bid_count = (allItems[idx].bid_count || 0) + 1;
+    }
+
+    okEl.textContent = `✅ Phone-in bid of $${amount.toLocaleString()} recorded for ${name} on "${item.title}".`;
+    okEl.style.display = 'block';
+    setTimeout(() => okEl.style.display = 'none', 6000);
+
+    clearPhoneInForm();
+    populatePhoneInItems();
+    refreshPhoneInCurrentBids();
+    await loadItems();
+    await loadAdminItems();
+    await loadAdminBids();
+    showToast(`📞 $${amount.toLocaleString()} — ${name}`);
+  } catch(e) {
+    errEl.textContent = 'Error recording bid: ' + e.message;
+    errEl.style.display = 'block';
+  }
+  if (btn) { btn.textContent = '📞 Record Phone-In Bid'; btn.disabled = false; }
+}
+
+function clearPhoneInForm() {
+  ['ph-name','ph-phone','ph-amount'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  const sel = document.getElementById('ph-item');
+  if (sel) sel.value = '';
+  document.getElementById('ph-error').style.display = 'none';
+  document.getElementById('ph-success').style.display = 'none';
+}
+
 /* ═══════════════════════════ ADMIN NOTIFICATION RECIPIENTS ═══════════════════════════ */
 let adminRecipients = []; // [{name, role, email, phone, viaEmail, viaText, allBids, newHigh}]
 const SETTINGS_KEY = 'admin_notif_recipients';
