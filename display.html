@@ -330,7 +330,7 @@
 <div class="grid-wrap" id="grid"></div>
 
 <script>
-const SUPABASE_URL_DISPLAY = 'https://qyoqyeaqacdjstvkonwx.supabase.co';
+let SUPABASE_URL_DISPLAY = '';
 let SUPABASE_ANON_KEY_DISPLAY = '';
 const REFRESH_INTERVAL = 20000; // 20 seconds
 let prevBids = {}; // track previous bid amounts to detect changes
@@ -342,6 +342,7 @@ async function loadConfig() {
   const res = await fetch('/.netlify/functions/config');
   if (!res.ok) throw new Error('Config failed');
   const cfg = await res.json();
+  SUPABASE_URL_DISPLAY = cfg.supabaseUrl;
   SUPABASE_ANON_KEY_DISPLAY = cfg.supabaseAnonKey;
 }
 
