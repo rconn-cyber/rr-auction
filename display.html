@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rough Riders Live Auction — Display</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --navy: #1e3a5f;
+    --navy-mid: #2a4f7a;
+    --navy-dark: #0f2040;
+    --gold: #b8922a;
+    --gold-light: #d4aa48;
+    --gold-dim: #8a6f30;
+    --gold-glow: #f0c84a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--navy-dark);
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  .display-header {
+    background: var(--navy-dark);
+    border-bottom: 3px solid var(--gold);
+    padding: 10px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+    flex-shrink: 0;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+  }
+  .header-title {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+  }
+  .header-title span { color: var(--gold-light); }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .live-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(184,146,42,0.15);
+    border: 1px solid var(--gold-dim);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+    text-transform: uppercase;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .last-updated {
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: .5px;
+  }
+
+  /* ── GRID ── */
+  .grid-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+    padding: 16px 20px 16px;
+    height: calc(100vh - 68px);
+  }
+
+  /* ── ITEM CARD ── */
+  .item-card {
+    background: linear-gradient(160deg, #1a3356 0%, #142b48 100%);
+    border: 1px solid rgba(184,146,42,0.25);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    transition: border-color .4s;
+  }
+  .item-card.just-updated {
+    border-color: var(--gold-light);
+    animation: cardFlash 1.8s ease-out;
+  }
+  @keyframes cardFlash {
+    0%   { box-shadow: 0 0 0 0 rgba(212,170,72,0); border-color: var(--gold-glow); }
+    25%  { box-shadow: 0 0 32px 8px rgba(212,170,72,0.45); border-color: var(--gold-glow); }
+    100% { box-shadow: 0 0 0 0 rgba(212,170,72,0); border-color: rgba(184,146,42,0.25); }
+  }
+
+  .item-number {
+    position: absolute;
+    top: 12px; left: 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    z-index: 2;
+  }
+
+  .item-img-wrap {
+    width: 100%;
+    height: 38%;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    background: rgba(0,0,0,0.2);
+  }
+  .item-img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    object-position: center;
+    padding: 8px;
+    opacity: 0.92;
+  }
+  .item-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+    color: rgba(184,146,42,0.3);
+  }
+
+  /* fade from img into card body */
+  .item-img-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(to bottom, transparent, #142b48);
+    pointer-events: none;
+  }
+
+  .item-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 18px 14px;
+    justify-content: space-between;
+  }
+
+  .item-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(13px, 1.4vw, 18px);
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .item-value {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+  }
+
+  .bid-section {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid rgba(184,146,42,0.2);
+    padding-top: 10px;
+    margin-top: auto;
+  }
+
+  .bid-left {}
+  .bid-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 2px;
+  }
+  .bid-amount {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 3.2vw, 48px);
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+    letter-spacing: 1px;
+    transition: color .3s;
+  }
+  .item-card.just-updated .bid-amount {
+    color: var(--gold-glow);
+  }
+  .bid-leader {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .bid-leader .phone-badge {
+    font-size: 11px;
+    background: rgba(184,146,42,0.2);
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px;
+    padding: 1px 7px;
+    color: var(--gold-dim);
+  }
+
+  .bid-right {
+    text-align: right;
+  }
+  .bid-count {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    white-space: nowrap;
+  }
+  .min-next {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  /* ── NEW BID FLASH OVERLAY ── */
+  .new-bid-flash {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: rgba(212,170,72,0.08);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 5;
+  }
+  .item-card.just-updated .new-bid-flash { opacity: 1; }
+
+  /* ── STATUS BADGE ── */
+  .item-status {
+    position: absolute;
+    top: 12px; right: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    z-index: 2;
+  }
+  .item-status.open { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+  .item-status.closed { background: rgba(100,116,139,0.3); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+
+  /* ── LOADING / ERROR ── */
+  .loading-screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--navy-dark);
+    z-index: 100;
+  }
+  .loading-screen .anchor { font-size: 48px; animation: spin 3s linear infinite; display: block; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-screen p { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 16px; letter-spacing: 2px; }
+
+  /* ── QR / CALL TO ACTION FOOTER on each card ── */
+  .card-cta {
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: .5px;
+    margin-top: 6px;
+    text-align: right;
+  }
+  .card-cta strong { color: rgba(255,255,255,0.45); }
+</style>
+</head>
+<body>
+
+<div id="loading-screen" class="loading-screen">
+  <span class="anchor">⚓</span>
+  <p>Loading Auction…</p>
+</div>
+
+<header class="display-header">
+  <div class="header-left">
+    <div>
+      <div class="header-logo">31st Annual Rough Riders Charity Fishing Tournament</div>
+      <div class="header-title">⚓ <span>Live</span> Auction</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-pill">
+      <span class="live-dot"></span>
+      Live Bidding Open
+    </div>
+    <div class="last-updated" id="last-updated">Connecting…</div>
+  </div>
+</header>
+
+<div class="grid-wrap" id="grid"></div>
+
+<script>
+const SUPABASE_URL_DISPLAY = 'https://qyoqyeaqacdjstvkonwx.supabase.co';
+let SUPABASE_ANON_KEY_DISPLAY = '';
+const REFRESH_INTERVAL = 20000; // 20 seconds
+let prevBids = {}; // track previous bid amounts to detect changes
+let refreshTimer = null;
+let secondsTimer = null;
+let lastRefresh = null;
+
+async function loadConfig() {
+  const res = await fetch('/.netlify/functions/config');
+  if (!res.ok) throw new Error('Config failed');
+  const cfg = await res.json();
+  SUPABASE_ANON_KEY_DISPLAY = cfg.supabaseAnonKey;
+}
+
+async function fetchItems() {
+  const res = await fetch(`${SUPABASE_URL_DISPLAY}/rest/v1/auction_items?order=created_at.asc&select=id,title,category,image_url,images,starting_bid,min_increment,current_bid,current_bidder,status`, {
+    headers: {
+      'apikey': SUPABASE_ANON_KEY_DISPLAY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY_DISPLAY}`
+    }
+  });
+  if (!res.ok) throw new Error('Fetch failed');
+  const items = await res.json();
+  // get bid counts
+  const counts = await fetch(`${SUPABASE_URL_DISPLAY}/rest/v1/auction_bids?select=item_id`, {
+    headers: { 'apikey': SUPABASE_ANON_KEY_DISPLAY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY_DISPLAY}` }
+  }).then(r => r.json()).catch(() => []);
+  const countMap = {};
+  (counts||[]).forEach(b => { countMap[b.item_id] = (countMap[b.item_id]||0)+1; });
+  return items.map(i => ({ ...i, bid_count: countMap[i.id]||0 }));
+}
+
+function getImages(item) {
+  if (item.images) {
+    try {
+      const arr = typeof item.images === 'string' ? JSON.parse(item.images) : item.images;
+      const filtered = arr.filter(u => u && u.trim());
+      if (filtered.length) return filtered;
+    } catch {}
+  }
+  if (item.image_url) return [item.image_url];
+  return [];
+}
+
+function categoryIcon(cat) {
+  const icons = { 'Fishing Gear':'🎣', 'Experiences':'⚓', 'Apparel':'👕', 'Gift Cards':'🎁', 'Art & Collectibles':'🏆', 'Food & Beverage':'🍺', 'General':'📦' };
+  return icons[cat] || '📦';
+}
+
+function esc(str) { if(!str)return''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function itemNumber(i) {
+  const labels = ['Item 1','Item 2','Item 3','Item 4'];
+  return labels[i] || `Item ${i+1}`;
+}
+
+function renderGrid(items) {
+  const grid = document.getElementById('grid');
+  const newCards = {};
+
+  items.forEach((item, idx) => {
+    const bid = item.current_bid || item.starting_bid || 0;
+    const imgs = getImages(item);
+    const primaryImg = imgs[0] || null;
+    const changed = prevBids[item.id] !== undefined && prevBids[item.id] !== bid;
+
+    // Detect phone-in bids
+    const leader = item.current_bidder || '';
+    const isPhoneIn = leader.includes('📞');
+    const cleanLeader = leader.replace('📞','').trim();
+
+    const imgHTML = primaryImg
+      ? `<img class="item-img" src="${esc(primaryImg)}" alt="${esc(item.title)}" onerror="this.style.display='none'">`
+      : `<div class="item-img-placeholder">${categoryIcon(item.category)}</div>`;
+
+    const cardHTML = `
+      <div class="item-card${changed?' just-updated':''}" id="card-${item.id}">
+        <div class="new-bid-flash"></div>
+        <span class="item-number">${itemNumber(idx)}</span>
+        <span class="item-status ${item.status}">${item.status === 'open' ? '● Open' : '● Closed'}</span>
+        <div class="item-img-wrap">${imgHTML}</div>
+        <div class="item-body">
+          <div>
+            <div class="item-title">${esc(item.title)}</div>
+          </div>
+          <div class="bid-section">
+            <div class="bid-left">
+              <div class="bid-label">${item.current_bidder ? 'Current High Bid' : 'Opening Bid'}</div>
+              <div class="bid-amount">$${bid.toLocaleString()}</div>
+              <div class="bid-leader">
+                ${cleanLeader ? `<span>${esc(cleanLeader)}</span>` : '<span style="color:rgba(255,255,255,0.25)">No bids yet — be first!</span>'}
+                ${isPhoneIn ? '<span class="phone-badge">📞 floor</span>' : ''}
+              </div>
+              <div class="card-cta">Bid at <strong>roughriders-auction.netlify.app</strong></div>
+            </div>
+            <div class="bid-right">
+              <div class="bid-count">${item.bid_count} bid${item.bid_count!==1?'s':''}</div>
+              <div class="min-next">Min next: $${(bid+(item.min_increment||5)).toLocaleString()}</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    newCards[item.id] = { html: cardHTML, bid, changed };
+    prevBids[item.id] = bid;
+  });
+
+  // Check if grid already has cards (update in place to avoid flicker)
+  const existingCards = grid.querySelectorAll('.item-card');
+  if (existingCards.length === items.length) {
+    items.forEach((item, idx) => {
+      const existing = document.getElementById('card-' + item.id);
+      if (existing) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = newCards[item.id].html;
+        const newCard = tmp.firstElementChild;
+        existing.replaceWith(newCard);
+        // Remove flash class after animation
+        if (newCards[item.id].changed) {
+          setTimeout(() => {
+            const el = document.getElementById('card-' + item.id);
+            if (el) el.classList.remove('just-updated');
+          }, 2000);
+        }
+      }
+    });
+  } else {
+    // Initial render
+    grid.innerHTML = items.map((item, idx) => newCards[item.id].html).join('');
+    items.forEach(item => {
+      if (newCards[item.id].changed) {
+        setTimeout(() => {
+          const el = document.getElementById('card-' + item.id);
+          if (el) el.classList.remove('just-updated');
+        }, 2000);
+      }
+    });
+  }
+}
+
+function startSecondsCounter() {
+  if (secondsTimer) clearInterval(secondsTimer);
+  secondsTimer = setInterval(() => {
+    if (!lastRefresh) return;
+    const secs = Math.round((Date.now() - lastRefresh) / 1000);
+    document.getElementById('last-updated').textContent =
+      secs < 5 ? 'Just updated' : `Updated ${secs}s ago · refreshes every 20s`;
+  }, 1000);
+}
+
+async function refresh() {
+  try {
+    const items = await fetchItems();
+    renderGrid(items);
+    lastRefresh = Date.now();
+    document.getElementById('last-updated').textContent = 'Just updated';
+  } catch(e) {
+    document.getElementById('last-updated').textContent = 'Update failed — retrying…';
+    console.error('Display refresh error:', e);
+  }
+}
+
+async function init() {
+  try {
+    await loadConfig();
+    await refresh();
+    document.getElementById('loading-screen').style.display = 'none';
+    startSecondsCounter();
+    refreshTimer = setInterval(refresh, REFRESH_INTERVAL);
+  } catch(e) {
+    document.getElementById('loading-screen').querySelector('p').textContent = 'Connection error. Please refresh.';
+    console.error('Display init error:', e);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
